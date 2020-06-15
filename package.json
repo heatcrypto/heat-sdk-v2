@@ -41,13 +41,17 @@
     "tsc": "tsc ./src/heat-sdk.ts"
   },
   "devDependencies": {
+    "@types/big.js": "^4.0.5",
     "@types/bytebuffer": "^5.0.41",
     "@types/long": "^4.0.1",
-    "long": "^4.0.0",
+    "@types/pako": "^1.0.1",
     "tslint": "^6.1.2",
     "typescript": "^3.9.5"
   },
   "dependencies": {
-    "bytebuffer": "^5.0.1"
+    "big.js": "^5.2.2",
+    "bytebuffer": "^5.0.1",
+    "long": "^4.0.0",
+    "pako": "^1.0.11"
   }
 }

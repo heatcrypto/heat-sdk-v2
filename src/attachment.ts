@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2017 Heat Ledger Ltd.
+ * Copyright (c) 2020 heatcrypto.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,19 +20,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-import * as appendix from "./appendix"
-import * as transactionType from "./transaction-type"
-import * as converters from "./converters"
-import * as utils from "./utils"
+import { Appendix, AbstractAppendix } from "./appendix"
+import { TransactionType, ORDINARY_PAYMENT_TRANSACTION_TYPE, ARBITRARY_MESSAGE_TRANSACTION_TYPE, COLORED_COINS_ASSET_ISSUANCE_TRANSACTION_TYPE, COLORED_COINS_ASSET_ISSUE_MORE_TRANSACTION_TYPE, COLORED_COINS_ASSET_TRANSFER_TRANSACTION_TYPE, COLORED_COINS_ATOMIC_MULTI_TRANSFER_TRANSACTION_TYPE, COLORED_COINS_ASK_ORDER_PLACEMENT_TRANSACTION_TYPE, COLORED_COINS_BID_ORDER_PLACEMENT_TRANSACTION_TYPE, ASK_ORDER_CANCELLATION_TRANSACTION_TYPE, BID_ORDER_CANCELLATION_TRANSACTION_TYPE, WHITELIST_ACCOUNT_ADDITION_TRANSACTION_TYPE, WHITELIST_ACCOUNT_REMOVAL_TRANSACTION_TYPE, WHITELIST_MARKET_TRANSACTION_TYPE, EFFECTIVE_BALANCE_LEASING_TRANSACTION_TYPE } from "./transaction-type"
+import { stringToByteArray, byteArrayToString, hexStringToByteArray, byteArrayToHexString } from "./converters"
+import { readBytes, writeBytes } from "./utils"
 import { Fee } from "./fee"
 import Long from "long"
 import * as ByteBuffer from "bytebuffer"
 
-export interface Attachment extends appendix.Appendix {
-  getTransactionType(): transactionType.TransactionType
+export interface Attachment extends Appendix {
+  getTransactionType(): TransactionType
 }
 
-export abstract class EmptyAttachment extends appendix.AbstractAppendix implements Attachment {
+export abstract class EmptyAttachment extends AbstractAppendix implements Attachment {
   constructor() {
     super()
     this.version = 0
@@ -46,15 +46,15 @@ export abstract class EmptyAttachment extends appendix.AbstractAppendix implemen
     return this.getMySize()
   }
 
-  putMyBytes(buffer: ByteBuffer) {}
+  putMyBytes(buffer: ByteBuffer) { }
 
-  putMyJSON(json: { [key: string]: any }) {}
+  putMyJSON(json: { [key: string]: any }) { }
 
   getMySize() {
     return 0
   }
 
-  abstract getTransactionType(): transactionType.TransactionType
+  abstract getTransactionType(): TransactionType
   abstract getFee(): string
 }
 
@@ -66,7 +66,7 @@ export class Payment extends EmptyAttachment {
     return "OrdinaryPayment"
   }
   getTransactionType() {
-    return transactionType.ORDINARY_PAYMENT_TRANSACTION_TYPE
+    return ORDINARY_PAYMENT_TRANSACTION_TYPE
   }
 }
 
@@ -78,18 +78,18 @@ export class Message extends EmptyAttachment {
     return "ArbitraryMessage"
   }
   getTransactionType() {
-    return transactionType.ARBITRARY_MESSAGE_TRANSACTION_TYPE
+    return ARBITRARY_MESSAGE_TRANSACTION_TYPE
   }
 }
 
 // ------------------- Asset ------------------------------------------------------------------------------------------
 
-export class AssetIssuance extends appendix.AbstractAppendix implements Attachment {
-  private descriptionUrl: string
-  private descriptionHash: number[]
-  private quantity: Long
-  private decimals: number
-  private dillutable: boolean
+export class AssetIssuance extends AbstractAppendix implements Attachment {
+  private descriptionUrl: string | undefined
+  private descriptionHash: number[] | undefined
+  private quantity: Long | undefined
+  private decimals: number | undefined
+  private dillutable: boolean | undefined
 
   init(
     descriptionUrl: string,
@@ -107,13 +107,13 @@ export class AssetIssuance extends appendix.AbstractAppendix implements Attachme
   }
 
   getMySize(): number {
-    return 1 + converters.stringToByteArray(this.descriptionUrl).length + 32 + 8 + 1 + 1
+    return 1 + stringToByteArray(this.descriptionUrl!).length + 32 + 8 + 1 + 1
   }
 
   public parse(buffer: ByteBuffer) {
     super.parse(buffer)
-    this.descriptionUrl = converters.byteArrayToString(utils.readBytes(buffer, buffer.readByte())) //need to check Constants.MAX_ASSET_DESCRIPTION_URL_LENGTH ?
-    this.descriptionHash = utils.readBytes(buffer, 32)
+    this.descriptionUrl = byteArrayToString(readBytes(buffer, buffer.readByte())) //need to check Constants.MAX_ASSET_DESCRIPTION_URL_LENGTH ?
+    this.descriptionHash = readBytes(buffer, 32)
     this.quantity = buffer.readInt64()
     this.decimals = buffer.readByte()
     this.dillutable = buffer.readByte() == 1
@@ -121,21 +121,21 @@ export class AssetIssuance extends appendix.AbstractAppendix implements Attachme
   }
 
   putMyBytes(buffer: ByteBuffer): void {
-    let descriptionUrl = converters.stringToByteArray(this.descriptionUrl)
+    let descriptionUrl = stringToByteArray(this.descriptionUrl!)
     buffer.writeByte(descriptionUrl.length)
-    utils.writeBytes(buffer, descriptionUrl)
+    writeBytes(buffer, descriptionUrl)
     if (this.descriptionHash && this.descriptionHash.length != 32)
       throw new Error("Description hash length must be 32")
-    utils.writeBytes(buffer, this.descriptionHash)
-    buffer.writeInt64(this.quantity)
-    buffer.writeByte(this.decimals)
+    writeBytes(buffer, this.descriptionHash!)
+    buffer.writeInt64(this.quantity!)
+    buffer.writeByte(this.decimals!)
     buffer.writeByte(this.dillutable ? 1 : 0)
   }
 
   public parseJSON(json: { [key: string]: any }) {
     super.parseJSON(json)
     this.descriptionUrl = json["descriptionUrl"]
-    this.descriptionHash = <any>converters.hexStringToByteArray(json["descriptionHash"])
+    this.descriptionHash = hexStringToByteArray(json["descriptionHash"])
     this.quantity = Long.fromString(json["quantity"])
     this.decimals = json["decimals"]
     this.dillutable = json["dillutable"]
@@ -144,8 +144,8 @@ export class AssetIssuance extends appendix.AbstractAppendix implements Attachme
 
   putMyJSON(json: { [key: string]: any }): void {
     json["descriptionUrl"] = this.descriptionUrl
-    json["descriptionHash"] = converters.byteArrayToHexString(Array.from(this.descriptionHash))
-    json["quantity"] = this.quantity.toString()
+    json["descriptionHash"] = byteArrayToHexString(Array.from(this.descriptionHash!))
+    json["quantity"] = this.quantity!.toString()
     json["decimals"] = this.decimals
     json["dillutable"] = this.dillutable
   }
@@ -159,33 +159,33 @@ export class AssetIssuance extends appendix.AbstractAppendix implements Attachme
   }
 
   getTransactionType() {
-    return transactionType.COLORED_COINS_ASSET_ISSUANCE_TRANSACTION_TYPE
+    return COLORED_COINS_ASSET_ISSUANCE_TRANSACTION_TYPE
   }
 
   getDescriptionUrl(): string {
-    return this.descriptionUrl
+    return this.descriptionUrl!
   }
 
   getDescriptionHash(): number[] {
-    return this.descriptionHash
+    return this.descriptionHash!
   }
 
   getQuantity(): Long {
-    return this.quantity
+    return this.quantity!
   }
 
   getDecimals(): number {
-    return this.decimals
+    return this.decimals!
   }
 
   getDillutable(): boolean {
-    return this.dillutable
+    return this.dillutable!
   }
 }
 
-export abstract class AssetBase extends appendix.AbstractAppendix {
-  private assetId: Long
-  private quantity: Long
+export abstract class AssetBase extends AbstractAppendix {
+  private assetId: Long | undefined
+  private quantity: Long | undefined
 
   init(assetId: string, quantity: string) {
     this.assetId = Long.fromString(assetId)
@@ -205,13 +205,13 @@ export abstract class AssetBase extends appendix.AbstractAppendix {
   }
 
   putMyBytes(buffer: ByteBuffer): void {
-    buffer.writeInt64(this.assetId)
-    buffer.writeInt64(this.quantity)
+    buffer.writeInt64(this.assetId!)
+    buffer.writeInt64(this.quantity!)
   }
 
   putMyJSON(json: { [key: string]: any }): void {
-    json["asset"] = this.assetId.toUnsigned().toString()
-    json["quantity"] = this.quantity.toString()
+    json["asset"] = this.assetId!.toUnsigned().toString()
+    json["quantity"] = this.quantity!.toString()
   }
 
   parseJSON(json: { [key: string]: any }) {
@@ -222,11 +222,11 @@ export abstract class AssetBase extends appendix.AbstractAppendix {
   }
 
   getAssetId(): Long {
-    return this.assetId
+    return this.assetId!
   }
 
   getQuantity(): Long {
-    return this.quantity
+    return this.quantity!
   }
 }
 
@@ -240,7 +240,7 @@ export class AssetIssueMore extends AssetBase implements Attachment {
   }
 
   getTransactionType() {
-    return transactionType.COLORED_COINS_ASSET_ISSUE_MORE_TRANSACTION_TYPE
+    return COLORED_COINS_ASSET_ISSUE_MORE_TRANSACTION_TYPE
   }
 }
 
@@ -254,7 +254,7 @@ export class AssetTransfer extends AssetBase implements Attachment {
   }
 
   getTransactionType() {
-    return transactionType.COLORED_COINS_ASSET_TRANSFER_TRANSACTION_TYPE
+    return COLORED_COINS_ASSET_TRANSFER_TRANSACTION_TYPE
   }
 }
 
@@ -264,8 +264,8 @@ export type AtomicTransfer = {
   quantity: string
 }
 
-export class AtomicMultiTransfer extends appendix.AbstractAppendix implements Attachment {
-  private transfers: AtomicTransfer[]
+export class AtomicMultiTransfer extends AbstractAppendix implements Attachment {
+  private transfers: AtomicTransfer[] | undefined
 
   init(transfers: AtomicTransfer[]) {
     this.transfers = transfers
@@ -273,7 +273,7 @@ export class AtomicMultiTransfer extends appendix.AbstractAppendix implements At
   }
 
   get getTransfers(): AtomicTransfer[] {
-    return this.transfers
+    return this.transfers!
   }
 
   getFee() {
@@ -285,16 +285,16 @@ export class AtomicMultiTransfer extends appendix.AbstractAppendix implements At
   }
 
   getTransactionType() {
-    return transactionType.COLORED_COINS_ATOMIC_MULTI_TRANSFER_TRANSACTION_TYPE
+    return COLORED_COINS_ATOMIC_MULTI_TRANSFER_TRANSACTION_TYPE
   }
 
   getMySize(): number {
-    return 1 + this.transfers.length * (8 + 8 + 8)
+    return 1 + this.transfers!.length * (8 + 8 + 8)
   }
 
   putMyBytes(buffer: ByteBuffer): void {
-    buffer.writeByte(this.transfers.length)
-    this.transfers.forEach(function(transfer) {
+    buffer.writeByte(this.transfers!.length)
+    this.transfers!.forEach(function (transfer) {
       buffer.writeInt64(Long.fromString(transfer.recipient, true))
       buffer.writeInt64(Long.fromString(transfer.assetId, true))
       buffer.writeInt64(Long.fromString(transfer.quantity))
@@ -324,7 +324,7 @@ export class AtomicMultiTransfer extends appendix.AbstractAppendix implements At
 
   putMyJSON(json: { [key: string]: any }): void {
     let ts = <Array<any>>[]
-    this.transfers.forEach(function(transfer) {
+    this.transfers!.forEach(function (transfer) {
       ts.push({
         recipient: transfer.recipient,
         assetId: transfer.assetId,
@@ -350,12 +350,12 @@ export class AtomicMultiTransfer extends appendix.AbstractAppendix implements At
 
 // ------------------- Colored coins. Orders ----------------------------------------------------------------------------
 
-export abstract class ColoredCoinsOrderPlacement extends appendix.AbstractAppendix {
-  private currencyId: Long
-  private assetId: Long
-  private quantity: Long
-  private price: Long
-  private expiration: number
+export abstract class ColoredCoinsOrderPlacement extends AbstractAppendix {
+  private currencyId: Long | undefined
+  private assetId: Long | undefined
+  private quantity: Long | undefined
+  private price: Long | undefined
+  private expiration: number | undefined
 
   init(currencyId: string, assetId: string, quantity: string, price: string, expiration: number) {
     this.currencyId = Long.fromString(currencyId)
@@ -371,11 +371,11 @@ export abstract class ColoredCoinsOrderPlacement extends appendix.AbstractAppend
   }
 
   putMyBytes(buffer: ByteBuffer): void {
-    buffer.writeInt64(this.currencyId)
-    buffer.writeInt64(this.assetId)
-    buffer.writeInt64(this.quantity)
-    buffer.writeInt64(this.price)
-    buffer.writeInt32(this.expiration)
+    buffer.writeInt64(this.currencyId!)
+    buffer.writeInt64(this.assetId!)
+    buffer.writeInt64(this.quantity!)
+    buffer.writeInt64(this.price!)
+    buffer.writeInt32(this.expiration!)
   }
 
   public parse(buffer: ByteBuffer) {
@@ -389,11 +389,11 @@ export abstract class ColoredCoinsOrderPlacement extends appendix.AbstractAppend
   }
 
   putMyJSON(json: { [key: string]: any }): void {
-    json["currency"] = this.currencyId.toUnsigned().toString()
-    json["asset"] = this.assetId.toUnsigned().toString()
-    json["quantity"] = this.quantity.toString()
-    json["price"] = this.price.toString()
-    json["expiration"] = this.expiration.toString()
+    json["currency"] = this.currencyId!.toUnsigned().toString()
+    json["asset"] = this.assetId!.toUnsigned().toString()
+    json["quantity"] = this.quantity!.toString()
+    json["price"] = this.price!.toString()
+    json["expiration"] = this.expiration!.toString()
   }
 
   parseJSON(json: { [key: string]: any }) {
@@ -411,23 +411,23 @@ export abstract class ColoredCoinsOrderPlacement extends appendix.AbstractAppend
   }
 
   getCurrencyId(): Long {
-    return this.currencyId
+    return this.currencyId!
   }
 
   getAssetId(): Long {
-    return this.assetId
+    return this.assetId!
   }
 
   getQuantity(): Long {
-    return this.quantity
+    return this.quantity!
   }
 
   getPrice(): Long {
-    return this.price
+    return this.price!
   }
 
   getExpiration(): number {
-    return this.expiration
+    return this.expiration!
   }
 }
 
@@ -438,7 +438,7 @@ export class ColoredCoinsAskOrderPlacement extends ColoredCoinsOrderPlacement
   }
 
   getTransactionType() {
-    return transactionType.COLORED_COINS_ASK_ORDER_PLACEMENT_TRANSACTION_TYPE
+    return COLORED_COINS_ASK_ORDER_PLACEMENT_TRANSACTION_TYPE
   }
 }
 
@@ -449,12 +449,12 @@ export class ColoredCoinsBidOrderPlacement extends ColoredCoinsOrderPlacement
   }
 
   getTransactionType() {
-    return transactionType.COLORED_COINS_BID_ORDER_PLACEMENT_TRANSACTION_TYPE
+    return COLORED_COINS_BID_ORDER_PLACEMENT_TRANSACTION_TYPE
   }
 }
 
-export abstract class ColoredCoinsOrderCancellation extends appendix.AbstractAppendix {
-  private orderId: Long
+export abstract class ColoredCoinsOrderCancellation extends AbstractAppendix {
+  private orderId: Long | undefined
 
   init(orderId: string) {
     this.orderId = Long.fromString(orderId)
@@ -472,7 +472,7 @@ export abstract class ColoredCoinsOrderCancellation extends appendix.AbstractApp
   }
 
   putMyBytes(buffer: ByteBuffer): void {
-    buffer.writeInt64(this.orderId)
+    buffer.writeInt64(this.orderId!)
   }
 
   parseJSON(json: { [key: string]: any }) {
@@ -482,7 +482,7 @@ export abstract class ColoredCoinsOrderCancellation extends appendix.AbstractApp
   }
 
   putMyJSON(json: { [key: string]: any }): void {
-    json["order"] = this.orderId.toUnsigned().toString()
+    json["order"] = this.orderId!.toUnsigned().toString()
   }
 
   getFee() {
@@ -490,7 +490,7 @@ export abstract class ColoredCoinsOrderCancellation extends appendix.AbstractApp
   }
 
   getOrderId(): Long {
-    return this.orderId
+    return this.orderId!
   }
 }
 
@@ -501,7 +501,7 @@ export class ColoredCoinsAskOrderCancellation extends ColoredCoinsOrderCancellat
   }
 
   getTransactionType() {
-    return transactionType.ASK_ORDER_CANCELLATION_TRANSACTION_TYPE
+    return ASK_ORDER_CANCELLATION_TRANSACTION_TYPE
   }
 }
 
@@ -512,17 +512,17 @@ export class ColoredCoinsBidOrderCancellation extends ColoredCoinsOrderCancellat
   }
 
   getTransactionType() {
-    return transactionType.BID_ORDER_CANCELLATION_TRANSACTION_TYPE
+    return BID_ORDER_CANCELLATION_TRANSACTION_TYPE
   }
 }
 
 // ------------------- Colored coins. Whitelist ------------------------------------------------------------------------
 
-export class ColoredCoinsWhitelistAccountAddition extends appendix.AbstractAppendix
+export class ColoredCoinsWhitelistAccountAddition extends AbstractAppendix
   implements Attachment {
-  private assetId: Long
-  private accountId: Long
-  private endHeight: number
+  private assetId: Long | undefined
+  private accountId: Long | undefined
+  private endHeight: number | undefined
 
   init(assetId: string, accountId: string, endHeight: number) {
     this.assetId = Long.fromString(assetId)
@@ -544,9 +544,9 @@ export class ColoredCoinsWhitelistAccountAddition extends appendix.AbstractAppen
   }
 
   putMyBytes(buffer: ByteBuffer): void {
-    buffer.writeInt64(this.assetId)
-    buffer.writeInt64(this.accountId)
-    buffer.writeInt32(this.endHeight)
+    buffer.writeInt64(this.assetId!)
+    buffer.writeInt64(this.accountId!)
+    buffer.writeInt32(this.endHeight!)
   }
 
   parseJSON(json: { [key: string]: any }) {
@@ -558,8 +558,8 @@ export class ColoredCoinsWhitelistAccountAddition extends appendix.AbstractAppen
   }
 
   putMyJSON(json: { [key: string]: any }): void {
-    json["asset"] = this.assetId.toUnsigned().toString()
-    json["account"] = this.accountId.toUnsigned().toString()
+    json["asset"] = this.assetId!.toUnsigned().toString()
+    json["account"] = this.accountId!.toUnsigned().toString()
     json["endHeight"] = this.endHeight
   }
 
@@ -568,7 +568,7 @@ export class ColoredCoinsWhitelistAccountAddition extends appendix.AbstractAppen
   }
 
   getTransactionType() {
-    return transactionType.WHITELIST_ACCOUNT_ADDITION_TRANSACTION_TYPE
+    return WHITELIST_ACCOUNT_ADDITION_TRANSACTION_TYPE
   }
 
   getFee() {
@@ -576,22 +576,22 @@ export class ColoredCoinsWhitelistAccountAddition extends appendix.AbstractAppen
   }
 
   getAssetId(): Long {
-    return this.assetId
+    return this.assetId!
   }
 
   getAccountId(): Long {
-    return this.accountId
+    return this.accountId!
   }
 
   getEndHeight(): number {
-    return this.endHeight
+    return this.endHeight!
   }
 }
 
-export class ColoredCoinsWhitelistAccountRemoval extends appendix.AbstractAppendix
+export class ColoredCoinsWhitelistAccountRemoval extends AbstractAppendix
   implements Attachment {
-  private assetId: Long
-  private accountId: Long
+  private assetId: Long | undefined
+  private accountId: Long | undefined
 
   init(assetId: string, accountId: string) {
     this.assetId = Long.fromString(assetId)
@@ -611,8 +611,8 @@ export class ColoredCoinsWhitelistAccountRemoval extends appendix.AbstractAppend
   }
 
   putMyBytes(buffer: ByteBuffer): void {
-    buffer.writeInt64(this.assetId)
-    buffer.writeInt64(this.accountId)
+    buffer.writeInt64(this.assetId!)
+    buffer.writeInt64(this.accountId!)
   }
 
   parseJSON(json: { [key: string]: any }) {
@@ -623,8 +623,8 @@ export class ColoredCoinsWhitelistAccountRemoval extends appendix.AbstractAppend
   }
 
   putMyJSON(json: { [key: string]: any }): void {
-    json["asset"] = this.assetId.toUnsigned().toString()
-    json["account"] = this.accountId.toUnsigned().toString()
+    json["asset"] = this.assetId!.toUnsigned().toString()
+    json["account"] = this.accountId!.toUnsigned().toString()
   }
 
   getAppendixName() {
@@ -632,7 +632,7 @@ export class ColoredCoinsWhitelistAccountRemoval extends appendix.AbstractAppend
   }
 
   getTransactionType() {
-    return transactionType.WHITELIST_ACCOUNT_REMOVAL_TRANSACTION_TYPE
+    return WHITELIST_ACCOUNT_REMOVAL_TRANSACTION_TYPE
   }
 
   getFee() {
@@ -640,17 +640,17 @@ export class ColoredCoinsWhitelistAccountRemoval extends appendix.AbstractAppend
   }
 
   getAssetId(): Long {
-    return this.assetId
+    return this.assetId!
   }
 
   getAccountId(): Long {
-    return this.accountId
+    return this.accountId!
   }
 }
 
-export class ColoredCoinsWhitelistMarket extends appendix.AbstractAppendix implements Attachment {
-  private currencyId: Long
-  private assetId: Long
+export class ColoredCoinsWhitelistMarket extends AbstractAppendix implements Attachment {
+  private currencyId: Long | undefined
+  private assetId: Long | undefined
 
   init(currencyId: string, assetId: string) {
     this.currencyId = Long.fromString(currencyId)
@@ -670,8 +670,8 @@ export class ColoredCoinsWhitelistMarket extends appendix.AbstractAppendix imple
   }
 
   putMyBytes(buffer: ByteBuffer): void {
-    buffer.writeInt64(this.currencyId)
-    buffer.writeInt64(this.assetId)
+    buffer.writeInt64(this.currencyId!)
+    buffer.writeInt64(this.assetId!)
   }
 
   parseJSON(json: { [key: string]: any }) {
@@ -682,8 +682,8 @@ export class ColoredCoinsWhitelistMarket extends appendix.AbstractAppendix imple
   }
 
   putMyJSON(json: { [key: string]: any }): void {
-    json["currency"] = this.currencyId.toUnsigned().toString()
-    json["asset"] = this.assetId.toUnsigned().toString()
+    json["currency"] = this.currencyId!.toUnsigned().toString()
+    json["asset"] = this.assetId!.toUnsigned().toString()
   }
 
   getAppendixName() {
@@ -691,7 +691,7 @@ export class ColoredCoinsWhitelistMarket extends appendix.AbstractAppendix imple
   }
 
   getTransactionType() {
-    return transactionType.WHITELIST_MARKET_TRANSACTION_TYPE
+    return WHITELIST_MARKET_TRANSACTION_TYPE
   }
 
   getFee() {
@@ -699,19 +699,19 @@ export class ColoredCoinsWhitelistMarket extends appendix.AbstractAppendix imple
   }
 
   getAssetId(): Long {
-    return this.assetId
+    return this.assetId!
   }
 
   getCurrencyId(): Long {
-    return this.currencyId
+    return this.currencyId!
   }
 }
 
 // ------------------- AccountControlEffectiveBalanceLeasing -----------------------------------------------------------
 
-export class AccountControlEffectiveBalanceLeasing extends appendix.AbstractAppendix
+export class AccountControlEffectiveBalanceLeasing extends AbstractAppendix
   implements Attachment {
-  private period: number
+  private period: number | undefined
 
   init(period: number) {
     this.period = period
@@ -729,7 +729,7 @@ export class AccountControlEffectiveBalanceLeasing extends appendix.AbstractAppe
   }
 
   putMyBytes(buffer: ByteBuffer): void {
-    buffer.writeInt32(this.period)
+    buffer.writeInt32(this.period!)
   }
 
   parseJSON(json: { [key: string]: any }) {
@@ -747,7 +747,7 @@ export class AccountControlEffectiveBalanceLeasing extends appendix.AbstractAppe
   }
 
   getTransactionType() {
-    return transactionType.EFFECTIVE_BALANCE_LEASING_TRANSACTION_TYPE
+    return EFFECTIVE_BALANCE_LEASING_TRANSACTION_TYPE
   }
 
   getFee() {
@@ -755,7 +755,7 @@ export class AccountControlEffectiveBalanceLeasing extends appendix.AbstractAppe
   }
 
   getPeriod(): number {
-    return this.period
+    return this.period!
   }
 }
 

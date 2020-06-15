@@ -21,10 +21,10 @@
  * SOFTWARE.
  * */
 import { Builder, TransactionImpl } from "./builder"
-import * as utils from "./utils"
-import * as appendix from "./appendix"
-import * as converters from "./converters"
-import * as crypto from "./crypto"
+import { isDefined, epochTime, isPublicKey } from "./utils"
+import { AppendixPublicKeyAnnouncement, AppendixMessage, AppendixEncryptedMessage, AppendixEncryptToSelfMessage } from "./appendix"
+import { hexStringToByteArray, stringToByteArray } from "./converters"
+import { secretPhraseToPublicKey, getAccountIdFromPublicKey, encryptMessage } from "./crypto"
 import { HeatSDK } from "./heat-sdk"
 
 export interface IBroadcastOutput {
@@ -39,18 +39,18 @@ export interface IBroadcastOutput {
 }
 
 export class Transaction {
-  private publicMessage_: string
-  private privateMessage_: string
-  private privateMessageToSelf_: string
-  private messageIsBinary_: boolean
-  private deadline_: number
-  private transaction_: TransactionImpl
+  private publicMessage_: string | undefined
+  private privateMessage_: string | undefined
+  private privateMessageToSelf_: string | undefined
+  private messageIsBinary_: boolean | undefined
+  private deadline_: number | undefined
+  private transaction_: TransactionImpl | undefined
 
   constructor(
     private heatsdk: HeatSDK,
     private recipientOrRecipientPublicKey: string,
     private builder: Builder
-  ) {}
+  ) { }
 
   public sign(secretPhrase: string): Promise<Transaction> {
     return this.build(secretPhrase).then(() => {
@@ -59,73 +59,65 @@ export class Transaction {
     })
   }
 
-  public broadcast<T>(): Promise<T> {
-    if (!utils.isDefined(this.transaction_)) throw new Error("Must call sign() first")
-    return this.heatsdk.api.post("/tx/broadcast", {
-      transactionBytes: this.transaction_.getBytesAsHex()
-    })
-  }
-
   /**
    * Return signed transaction
    */
   public getTransaction() {
-    if (!utils.isDefined(this.transaction_)) throw new Error("Must call sign() first")
+    if (!isDefined(this.transaction_)) throw new Error("Must call sign() first")
     return this.transaction_
   }
 
   private build(secretPhrase: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.builder
-        .deadline(utils.isDefined(this.deadline_) ? this.deadline_ : 1440)
-        .timestamp(utils.epochTime())
+        .deadline(isDefined(this.deadline_) ? this.deadline_! : 1440)
+        .timestamp(epochTime())
         .ecBlockHeight(1)
         .ecBlockId("0")
 
       let recipientPublicKeyHex
-      if (utils.isDefined(this.privateMessageToSelf_))
-        recipientPublicKeyHex = crypto.secretPhraseToPublicKey(secretPhrase)
+      if (isDefined(this.privateMessageToSelf_))
+        recipientPublicKeyHex = secretPhraseToPublicKey(secretPhrase)
 
       if (!recipientPublicKeyHex)
-        recipientPublicKeyHex = utils.isPublicKey(this.recipientOrRecipientPublicKey)
+        recipientPublicKeyHex = isPublicKey(this.recipientOrRecipientPublicKey)
           ? this.recipientOrRecipientPublicKey
           : null
 
       if (recipientPublicKeyHex) {
         this.builder
           .publicKeyAnnouncement(
-            new appendix.AppendixPublicKeyAnnouncement().init(
-              converters.hexStringToByteArray(recipientPublicKeyHex)
+            new AppendixPublicKeyAnnouncement().init(
+              hexStringToByteArray(recipientPublicKeyHex)
             )
           )
-          .recipientId(crypto.getAccountIdFromPublicKey(recipientPublicKeyHex))
+          .recipientId(getAccountIdFromPublicKey(recipientPublicKeyHex))
       } else {
         this.builder.recipientId(this.recipientOrRecipientPublicKey)
       }
 
-      if (utils.isDefined(this.publicMessage_)) {
-        let a = new appendix.AppendixMessage().init(
+      if (isDefined(this.publicMessage_)) {
+        let a = new AppendixMessage().init(
           this.messageIsBinary_
-            ? converters.hexStringToByteArray(this.publicMessage_)
-            : converters.stringToByteArray(this.publicMessage_),
+            ? hexStringToByteArray(this.publicMessage_!)
+            : stringToByteArray(this.publicMessage_!),
           !this.messageIsBinary_
         )
         this.builder.message(a)
       } else {
-        let isPrivate = utils.isDefined(this.privateMessage_)
-        let isPrivateToSelf = utils.isDefined(this.privateMessageToSelf_)
+        let isPrivate = isDefined(this.privateMessage_)
+        let isPrivateToSelf = isDefined(this.privateMessageToSelf_)
         if (isPrivate || isPrivateToSelf) {
           if (!recipientPublicKeyHex) throw new Error("Recipient public key not provided")
-          crypto
-            .encryptMessage(
-              isPrivate ? this.privateMessage_ : this.privateMessageToSelf_,
-              recipientPublicKeyHex,
-              secretPhrase
-            )
+          encryptMessage(
+            isPrivate ? this.privateMessage_! : this.privateMessageToSelf_!,
+            recipientPublicKeyHex,
+            secretPhrase
+          )
             .then(encryptedMessage => {
               let a = (isPrivate
-                ? new appendix.AppendixEncryptedMessage()
-                : new appendix.AppendixEncryptToSelfMessage()
+                ? new AppendixEncryptedMessage()
+                : new AppendixEncryptToSelfMessage()
               ).init(encryptedMessage, !this.messageIsBinary_)
               this.builder.encryptToSelfMessage(a)
               resolve() // resolve in encryptMessage callback
@@ -140,9 +132,9 @@ export class Transaction {
 
   private hasMessage() {
     return (
-      utils.isDefined(this.publicMessage_) ||
-      utils.isDefined(this.privateMessage_) ||
-      utils.isDefined(this.privateMessageToSelf_)
+      isDefined(this.publicMessage_) ||
+      isDefined(this.privateMessage_) ||
+      isDefined(this.privateMessageToSelf_)
     )
   }
 

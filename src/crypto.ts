@@ -33,7 +33,7 @@ import {
   wordArrayToByteArray
 } from "./converters"
 import Big from "big.js"
-import pako from "pako"
+import { gzip, inflate } from "pako"
 import Long from "long"
 import { randomBytes } from "./random-bytes"
 
@@ -172,8 +172,8 @@ export function getPrivateKey(secretPhrase: string) {
  * @returns String
  */
 export function getAccountId(secretPhrase: string) {
-  var publicKey = this.secretPhraseToPublicKey(secretPhrase)
-  return this.getAccountIdFromPublicKey(publicKey)
+  var publicKey = secretPhraseToPublicKey(secretPhrase)
+  return getAccountIdFromPublicKey(publicKey)
 }
 
 /**
@@ -360,7 +360,7 @@ function encryptData(
 
       var compressedPlaintext = uncompressed
         ? new Uint8Array(plaintext)
-        : pako.gzip(new Uint8Array(plaintext))
+        : gzip(new Uint8Array(plaintext))
 
       return aesEncrypt(<any>compressedPlaintext, options)
     })
@@ -466,7 +466,7 @@ export function decryptMessage(
 function decryptData(data: any, options: any, uncompressed?: boolean) {
   var compressedPlaintext = aesDecrypt(data, options)
   var binData = new Uint8Array(compressedPlaintext)
-  var data_ = uncompressed ? binData : pako.inflate(binData)
+  var data_ = uncompressed ? binData : inflate(binData)
   return byteArrayToString(<any>data_)
 }
 
@@ -3344,7 +3344,9 @@ CryptoJS.lib.Cipher ||
     })
     var b: any = (p.mode = {}),
       x = function(e: any, a: any, b: any) {
+        // @ts-ignore
         var c = this._iv
+        // @ts-ignore
         c ? (this._iv = u) : (c = this._prevBlock)
         for (var d = 0; d < b; d++) e[a + d] ^= c[d]
       },

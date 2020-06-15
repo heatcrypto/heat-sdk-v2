@@ -23,6 +23,8 @@
 declare function unescape(s: string): string
 declare function escape(s: string): string
 
+import Big from 'big.js';
+
 var charToNibble: { [key: string]: number } = {}
 var nibbleToChar: string[] = []
 var i
@@ -126,7 +128,7 @@ export function byteArrayToSignedInt32(
 export function byteArrayToBigInteger(
   bytes: Array<number>,
   opt_startIndex?: number
-): BigJsLibrary.BigJS {
+) {
   var value = new Big("0")
   var temp1, temp2
   for (var i = 7; i >= 0; i--) {

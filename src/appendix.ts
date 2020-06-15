@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2017 Heat Ledger Ltd.
+ * Copyright (c) 2020 heatcrypto.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,13 +21,12 @@
  * SOFTWARE.
  * */
 import { byteArrayToString, stringToByteArray, hexStringToByteArray, byteArrayToHexString } from "./converters"
-import * as utils from "./utils"
+import { readBytes, writeBytes } from "./utils"
 import * as ByteBuffer from "bytebuffer"
 import { Fee } from "./fee"
 import Long from "long"
-import * as constants from "./constants"
-import * as crypto from "./crypto"
-import { fullNameToLong, IEncryptedMessage } from "./crypto"
+import { MAX_INT32, MIN_INT32, MAX_ENCRYPTED_MESSAGE_LENGTH } from "./constants"
+import { IEncryptedMessage, fullNameToLong } from "./crypto"
 
 export interface Appendix {
   getSize(): number
@@ -109,14 +108,14 @@ export class AppendixMessage extends AbstractAppendix {
     super.parse(buffer)
     let messageLength = buffer.readInt()
     this.isText = messageLength < 0
-    if (messageLength < 0) messageLength &= constants.MAX_INT32
+    if (messageLength < 0) messageLength &= MAX_INT32
     this.message = []
     for (let i = 0; i < messageLength; i++) this.message.push(buffer.readByte())
     return this
   }
 
   public putMyBytes(buffer: ByteBuffer) {
-    buffer.writeInt(this.isText ? this.message!.length | constants.MIN_INT32 : this.message!.length)
+    buffer.writeInt(this.isText ? this.message!.length | MIN_INT32 : this.message!.length)
     this.message!.forEach(byte => {
       buffer.writeByte(byte)
     })
@@ -169,7 +168,7 @@ export abstract class AbstractAppendixEncryptedMessage extends AbstractAppendix 
     super.parse(buffer)
     let length = buffer.readInt32()
     this.isText_ = length < 0
-    if (length < 0) length &= constants.MAX_INT32
+    if (length < 0) length &= MAX_INT32
     if (length == 0) {
       this.encryptedMessage = {
         isText: this.isText_,
@@ -178,7 +177,7 @@ export abstract class AbstractAppendixEncryptedMessage extends AbstractAppendix 
       }
       return this
     }
-    if (length > constants.MAX_ENCRYPTED_MESSAGE_LENGTH)
+    if (length > MAX_ENCRYPTED_MESSAGE_LENGTH)
       throw new Error("Max encrypted data length exceeded: " + length)
     let messageBytes: number[] = new Array(length)
     for (let i = 0; i < length; i++) messageBytes[i] = buffer.readByte()
@@ -195,7 +194,7 @@ export abstract class AbstractAppendixEncryptedMessage extends AbstractAppendix 
   public putMyBytes(buffer: ByteBuffer) {
     let messageBytes = hexStringToByteArray(this.encryptedMessage!.data)
     let length = messageBytes.length
-    buffer.writeInt32(this.isText_ ? length | constants.MIN_INT32 : length)
+    buffer.writeInt32(this.isText_ ? length | MIN_INT32 : length)
     messageBytes.forEach(byte => {
       buffer.writeByte(byte)
     })
@@ -268,7 +267,7 @@ export class AppendixPublicKeyAnnouncement extends AbstractAppendix {
 
   public parse(buffer: ByteBuffer) {
     super.parse(buffer)
-    this.publicKey = utils.readBytes(buffer, 32)
+    this.publicKey = readBytes(buffer, 32)
     return this
   }
 
@@ -285,7 +284,7 @@ export class AppendixPublicKeyAnnouncement extends AbstractAppendix {
   }
 
   public putMyBytes(buffer: ByteBuffer) {
-    utils.writeBytes(buffer, this.publicKey!)
+    writeBytes(buffer, this.publicKey!)
   }
 
   public parseJSON(json: { [key: string]: any }) {
@@ -314,9 +313,9 @@ export class AppendixPrivateNameAnnouncement extends AbstractAppendix {
     return 8
   }
 
-  public putMyBytes(buffer: ByteBuffer) {}
+  public putMyBytes(buffer: ByteBuffer) { }
 
-  public putMyJSON(json: { [key: string]: any }) {}
+  public putMyJSON(json: { [key: string]: any }) { }
 
   public getName() {
     return this.privateNameAnnouncement
@@ -325,7 +324,7 @@ export class AppendixPrivateNameAnnouncement extends AbstractAppendix {
 
 export class AppendixPrivateNameAssignment extends AbstractAppendix {
   private privateNameAssignment: Long | undefined
-  private signature: number[] | undefined 
+  private signature: number[] | undefined
 
   getFee(): string {
     return Fee.PRIVATE_NAME_ASSIGNEMENT_APPENDIX_FEE
@@ -342,13 +341,13 @@ export class AppendixPrivateNameAssignment extends AbstractAppendix {
   public parse(buffer: ByteBuffer) {
     super.parse(buffer)
     this.privateNameAssignment = buffer.readInt64()
-    this.signature = utils.readBytes(buffer, 64)
+    this.signature = readBytes(buffer, 64)
     return this
   }
 
   public putMyBytes(buffer: ByteBuffer) {
     buffer.writeInt64(this.privateNameAssignment!)
-    utils.writeBytes(buffer, this.signature!)
+    writeBytes(buffer, this.signature!)
   }
 
   public parseJSON(json: { [key: string]: any }) {
@@ -370,7 +369,7 @@ export class AppendixPrivateNameAssignment extends AbstractAppendix {
 
 export class AppendixPublicNameAnnouncement extends AbstractAppendix {
   private nameHash: Long | undefined
-  private publicNameAnnouncement: Int8Array | undefined 
+  private publicNameAnnouncement: Int8Array | undefined
 
   getFee(): string {
     return Fee.PUBLIC_NAME_ANNOUNCEMENT_APPENDIX_FEE
@@ -384,9 +383,9 @@ export class AppendixPublicNameAnnouncement extends AbstractAppendix {
     return 1 + this.publicNameAnnouncement!.length
   }
 
-  public putMyBytes(buffer: ByteBuffer) {}
+  public putMyBytes(buffer: ByteBuffer) { }
 
-  public putMyJSON(json: { [key: string]: any }) {}
+  public putMyJSON(json: { [key: string]: any }) { }
 
   public getFullName() {
     return this.publicNameAnnouncement
@@ -416,23 +415,23 @@ export class AppendixPublicNameAssignment extends AbstractAppendix {
 
   public parse(buffer: ByteBuffer) {
     super.parse(buffer)
-    this.publicNameAssignment = utils.readBytes(buffer, buffer.readByte())
-    this.signature = utils.readBytes(buffer, 64)
-    this.nameHash = crypto.fullNameToLong(this.publicNameAssignment)
+    this.publicNameAssignment = readBytes(buffer, buffer.readByte())
+    this.signature = readBytes(buffer, 64)
+    this.nameHash = fullNameToLong(this.publicNameAssignment)
     return this
   }
 
   public putMyBytes(buffer: ByteBuffer) {
     buffer.writeByte(this.publicNameAssignment!.length)
-    utils.writeBytes(buffer, this.publicNameAssignment!)
-    utils.writeBytes(buffer, this.signature!)
+    writeBytes(buffer, this.publicNameAssignment!)
+    writeBytes(buffer, this.signature!)
   }
 
   public parseJSON(json: { [key: string]: any }) {
     super.parseJSON(json)
     this.publicNameAssignment = hexStringToByteArray(json["publicNameAssignment"])
     this.signature = hexStringToByteArray(json["signature"])
-    this.nameHash = crypto.fullNameToLong(this.publicNameAssignment)
+    this.nameHash = fullNameToLong(this.publicNameAssignment)
     return this
   }
 

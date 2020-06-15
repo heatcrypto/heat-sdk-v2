@@ -21,7 +21,7 @@
  * SOFTWARE.
  * */
 import Big from "big.js"
-import * as converters from "./converters"
+import { hexStringToByteArray } from "./converters"
 import * as ByteBuffer from "bytebuffer"
 
 export function isPublicKey(publicKeyHex: string): boolean {
@@ -30,7 +30,7 @@ export function isPublicKey(publicKeyHex: string): boolean {
   // }
   // return false
   var regExp = /^[-+]?[0-9A-Fa-f]+\.?[0-9A-Fa-f]*?$/
-  if (regExp.test(publicKeyHex)) return converters.hexStringToByteArray(publicKeyHex).length == 32
+  if (regExp.test(publicKeyHex)) return hexStringToByteArray(publicKeyHex).length == 32
   return false
 }
 
@@ -234,22 +234,6 @@ export function getByteLen(value: string): number {
   return byteLen
 }
 
-export function debounce(func: Function, wait?: number, immediate?: boolean) {
-  var timeout: any
-  return function() {
-    var context = this,
-      args = arguments
-    var later = function() {
-      timeout = null
-      if (!immediate) func.apply(context, args)
-    }
-    var callNow = immediate && !timeout
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait || 100)
-    if (callNow) func.apply(context, args)
-  }
-}
-
 export function repeatWhile(delay: number, cb: () => boolean) {
   var fn = () => {
     if (cb()) {
@@ -302,15 +286,4 @@ export function readBytes(buffer: ByteBuffer, length: number, offset?: number): 
 
 export function writeBytes(buffer: ByteBuffer, bytes: number[]) {
   for (let i = 0; i < bytes.length; i++) buffer.writeByte(bytes[i])
-}
-
-/* inpired by: https://italonascimento.github.io/applying-a-timeout-to-your-promises/ */
-export function setPromiseTimeout<T>(milliseconds: number, promise: Promise<any>): Promise<T> {
-  let timeout = new Promise((resolve, reject) => {
-    let id = setTimeout(() => {
-      clearTimeout(id)
-      reject("Timed out in " + milliseconds + "ms.")
-    }, milliseconds)
-  })
-  return Promise.race([promise, timeout])
 }

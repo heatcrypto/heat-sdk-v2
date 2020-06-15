@@ -1,9 +1,9 @@
-const crypto = require("crypto")
+import { randomBytes as _randomBytes } from "crypto"
 
 export function randomBytes(length: number): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     // Buffers are Uint8Arrays, so you just need to access its ArrayBuffer. This is O(1):
-    crypto.randomBytes(length, (err: any, buffer: any) => {
+    _randomBytes(length, (err: any, buffer: any) => {
       if (err) reject(err)
       else resolve(Uint8Array.from(buffer))
     })

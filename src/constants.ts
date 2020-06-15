@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2017 Heat Ledger Ltd.
+ * Copyright (c) 2020 heatcrypto.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,10 +21,10 @@
  * SOFTWARE.
  * */
 
-export let MIN_INT32 = 0x80000000
-export let MAX_INT32 = 0x7fffffff
+export const MIN_INT32 = 0x80000000
+export const MAX_INT32 = 0x7fffffff
 
-export let MAX_ENCRYPTED_MESSAGE_LENGTH = 1000
+export const MAX_ENCRYPTED_MESSAGE_LENGTH = 1000
 
 export class HeatConstants {
   static ONE_HEAT = 100000000

@@ -2,7 +2,7 @@
 /// <reference types="long" />
 /*
  * The MIT License (MIT)
- * Copyright (c) 2017 Heat Ledger Ltd.
+ * Copyright (c) 2020 heatcrypto.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,37 +24,38 @@
  * */
 import { TransactionType } from "./transaction-type"
 import { Attachment } from "./attachment"
-import * as appendix from "./appendix"
-import * as utils from "./utils"
-import * as converters from "./converters"
-import * as crypto from "./crypto"
+import { AppendixMessage, AppendixEncryptedMessage, AppendixEncryptToSelfMessage, 
+  AppendixPublicKeyAnnouncement, AppendixPrivateNameAnnouncement, AppendixPrivateNameAssignment, 
+  AppendixPublicNameAnnouncement, AppendixPublicNameAssignment, Appendix } from "./appendix"
+import { isDefined, extend, isEmpty } from "./utils"
+import { hexStringToByteArray, byteArrayToHexString, stringToHexString } from "./converters"
+import { secretPhraseToPublicKey, signBytes, verifyBytes } from "./crypto"
 import Long from "long"
 import ByteBuffer from "bytebuffer"
-import { Buffer } from "buffer"
 
 export class Builder {
   public _deadline = 1440
-  public _senderPublicKey: Array<number>
-  public _amountHQT: string
-  public _feeHQT: string
-  public _type: TransactionType
+  public _senderPublicKey: Array<number> | undefined
+  public _amountHQT: string | undefined
+  public _feeHQT: string | undefined
+  public _type: TransactionType | undefined
   public _version = 1
-  public _attachment: Attachment
-  public _recipientId: string
-  public _signature: Array<number>
-  public _message: appendix.AppendixMessage
-  public _encryptedMessage: appendix.AppendixEncryptedMessage
-  public _encryptToSelfMessage: appendix.AppendixEncryptToSelfMessage
-  public _publicKeyAnnouncement: appendix.AppendixPublicKeyAnnouncement
-  public _privateNameAnnouncement: appendix.AppendixPrivateNameAnnouncement
-  public _privateNameAssignment: appendix.AppendixPrivateNameAssignment
-  public _publicNameAnnouncement: appendix.AppendixPublicNameAnnouncement
-  public _publicNameAssignment: appendix.AppendixPublicNameAssignment
-  public _isTestnet: boolean
+  public _attachment: Attachment | undefined
+  public _recipientId: string | undefined
+  public _signature: Array<number> | undefined
+  public _message: AppendixMessage | undefined
+  public _encryptedMessage: AppendixEncryptedMessage | undefined
+  public _encryptToSelfMessage: AppendixEncryptToSelfMessage | undefined
+  public _publicKeyAnnouncement: AppendixPublicKeyAnnouncement | undefined
+  public _privateNameAnnouncement: AppendixPrivateNameAnnouncement | undefined
+  public _privateNameAssignment: AppendixPrivateNameAssignment | undefined
+  public _publicNameAnnouncement: AppendixPublicNameAnnouncement | undefined
+  public _publicNameAssignment: AppendixPublicNameAssignment | undefined
+  public _isTestnet: boolean | undefined
   public _genesisKey: Array<number> | undefined
-  public _timestamp: number
-  public _ecBlockHeight: number
-  public _ecBlockId: string
+  public _timestamp: number | undefined
+  public _ecBlockHeight: number | undefined
+  public _ecBlockId: string | undefined
 
   public deadline(deadline: number) {
     this._deadline = deadline
@@ -89,37 +90,37 @@ export class Builder {
     this._signature = signature
     return this
   }
-  public message(message: appendix.AppendixMessage) {
+  public message(message: AppendixMessage) {
     this._message = message
     return this
   }
-  public encryptedMessage(encryptedMessage: appendix.AppendixEncryptedMessage) {
+  public encryptedMessage(encryptedMessage: AppendixEncryptedMessage) {
     this._encryptedMessage = encryptedMessage
     return this
   }
-  public encryptToSelfMessage(encryptToSelfMessage: appendix.AppendixEncryptToSelfMessage) {
+  public encryptToSelfMessage(encryptToSelfMessage: AppendixEncryptToSelfMessage) {
     this._encryptToSelfMessage = encryptToSelfMessage
     return this
   }
-  public publicKeyAnnouncement(publicKeyAnnouncement: appendix.AppendixPublicKeyAnnouncement) {
+  public publicKeyAnnouncement(publicKeyAnnouncement: AppendixPublicKeyAnnouncement) {
     this._publicKeyAnnouncement = publicKeyAnnouncement
     return this
   }
   public privateNameAnnouncement(
-    privateNameAnnouncement: appendix.AppendixPrivateNameAnnouncement
+    privateNameAnnouncement: AppendixPrivateNameAnnouncement
   ) {
     this._privateNameAnnouncement = privateNameAnnouncement
     return this
   }
-  public privateNameAssignment(privateNameAssignment: appendix.AppendixPrivateNameAssignment) {
+  public privateNameAssignment(privateNameAssignment: AppendixPrivateNameAssignment) {
     this._privateNameAssignment = privateNameAssignment
     return this
   }
-  public publicNameAnnouncement(publicNameAnnouncement: appendix.AppendixPublicNameAnnouncement) {
+  public publicNameAnnouncement(publicNameAnnouncement: AppendixPublicNameAnnouncement) {
     this._publicNameAnnouncement = publicNameAnnouncement
     return this
   }
-  public publicNameAssignment(publicNameAssignment: appendix.AppendixPublicNameAssignment) {
+  public publicNameAssignment(publicNameAssignment: AppendixPublicNameAssignment) {
     this._publicNameAssignment = publicNameAssignment
     return this
   }
@@ -150,37 +151,37 @@ export class Builder {
 }
 
 export class TransactionImpl {
-  private appendages: Array<appendix.Appendix>
+  private appendages: Array<Appendix>
   private appendagesSize: number
   private height = 0x7fffffff
-  private signature: Array<number>
+  private signature: Array<number> | undefined
   private type: TransactionType
   private version: number
-  private timestamp: number
-  private deadline: number
-  private senderPublicKey: Array<number>
-  private recipientId: string
-  private amountHQT: string
-  private feeHQT: string
-  private message: appendix.AppendixMessage
-  private encryptedMessage: appendix.AppendixEncryptedMessage
-  private encryptToSelfMessage: appendix.AppendixEncryptToSelfMessage
-  private publicKeyAnnouncement: appendix.AppendixPublicKeyAnnouncement
-  private privateNameAnnouncement: appendix.AppendixPrivateNameAnnouncement
-  private privateNameAssignment: appendix.AppendixPrivateNameAssignment
-  private publicNameAnnouncement: appendix.AppendixPublicNameAnnouncement
-  private publicNameAssignment: appendix.AppendixPublicNameAssignment
-  private ecBlockHeight: number
-  private ecBlockId: string
+  private timestamp: number | undefined
+  private deadline: number | undefined
+  private senderPublicKey: Array<number> | undefined
+  private recipientId: string | undefined
+  private amountHQT: string | undefined
+  private feeHQT: string | undefined
+  private message: AppendixMessage | undefined
+  private encryptedMessage: AppendixEncryptedMessage | undefined
+  private encryptToSelfMessage: AppendixEncryptToSelfMessage | undefined
+  private publicKeyAnnouncement: AppendixPublicKeyAnnouncement | undefined
+  private privateNameAnnouncement: AppendixPrivateNameAnnouncement | undefined
+  private privateNameAssignment: AppendixPrivateNameAssignment | undefined
+  private publicNameAnnouncement: AppendixPublicNameAnnouncement | undefined
+  private publicNameAssignment: AppendixPublicNameAssignment | undefined
+  private ecBlockHeight: number | undefined
+  private ecBlockId: string | undefined
   private isTestnet: boolean
-  private genesisKey: Array<number>
+  private genesisKey: Array<number> | undefined
 
   constructor(builder: Builder, secretPhrase: string | null) {
     this.appendages = []
-    this.isTestnet = builder._isTestnet
+    this.isTestnet = builder._isTestnet || false
     this.genesisKey = builder._genesisKey
     this.timestamp = builder._timestamp
-    this.type = builder._type
+    this.type = builder._type!
     this.version = builder._version
     this.deadline = builder._deadline
     this.senderPublicKey = builder._senderPublicKey
@@ -199,16 +200,16 @@ export class TransactionImpl {
     this.ecBlockHeight = builder._ecBlockHeight
     this.ecBlockId = builder._ecBlockId
     this.senderPublicKey
-    if (utils.isDefined(builder._senderPublicKey)) this.senderPublicKey = builder._senderPublicKey
+    if (isDefined(builder._senderPublicKey)) this.senderPublicKey = builder._senderPublicKey
     else if (secretPhrase)
-      this.senderPublicKey = converters.hexStringToByteArray(
-        crypto.secretPhraseToPublicKey(secretPhrase)
+      this.senderPublicKey = hexStringToByteArray(
+        secretPhraseToPublicKey(secretPhrase)
       )
 
-    if (!utils.isDefined(builder._attachment)) throw new Error("Must provide attachment")
-    this.appendages.push(builder._attachment)
+    if (!isDefined(builder._attachment)) throw new Error("Must provide attachment")
+    this.appendages.push(builder._attachment!)
 
-    if (!utils.isDefined(builder._feeHQT)) this.feeHQT = builder._attachment.getFee()
+    if (!isDefined(builder._feeHQT)) this.feeHQT = builder._attachment!.getFee()
 
     if (builder._message) this.appendages.push(builder._message)
     if (builder._encryptedMessage) this.appendages.push(builder._encryptedMessage)
@@ -226,9 +227,9 @@ export class TransactionImpl {
     if (builder._signature && secretPhrase != null) throw new Error("Transaction is already signed")
     else if (secretPhrase) {
       let unsignedBytes = this.getUnsignedBytes()
-      let unsignedHex = converters.byteArrayToHexString(unsignedBytes)
-      let signatureHex = crypto.signBytes(unsignedHex, converters.stringToHexString(secretPhrase))
-      if (signatureHex) this.signature = converters.hexStringToByteArray(signatureHex)
+      let unsignedHex = byteArrayToHexString(unsignedBytes)
+      let signatureHex = signBytes(unsignedHex, stringToHexString(secretPhrase))
+      if (signatureHex) this.signature = hexStringToByteArray(signatureHex)
       else throw new Error("Could not create signature")
     }
   }
@@ -239,7 +240,7 @@ export class TransactionImpl {
 
   public getUnsignedBytes(): Array<number> {
     let bytesHex = this.getBytesAsHex()
-    let bytes = converters.hexStringToByteArray(bytesHex)
+    let bytes = hexStringToByteArray(bytesHex)
     return this.zeroSignature(bytes)
   }
 
@@ -287,28 +288,28 @@ export class TransactionImpl {
     let buffer = ByteBuffer.allocate(size).order(ByteBuffer.LITTLE_ENDIAN)
     buffer.writeByte(this.type.getType())
     buffer.writeByte((this.version << 4) | this.type.getSubtype())
-    buffer.writeInt(this.timestamp)
-    buffer.writeShort(this.deadline)
-    for (let i = 0; i < this.senderPublicKey.length; i++) buffer.writeByte(this.senderPublicKey[i])
+    buffer.writeInt(this.timestamp!)
+    buffer.writeShort(this.deadline!)
+    for (let i = 0; i < this.senderPublicKey!.length; i++) buffer.writeByte(this.senderPublicKey![i])
 
     let recipient = Long.fromString(
-      this.type.canHaveRecipient() ? this.recipientId : "8150091319858025343",
+      this.type.canHaveRecipient() ? this.recipientId! : "8150091319858025343",
       true
     )
     buffer.writeInt64(recipient)
 
-    let amount = Long.fromString(this.amountHQT, false)
+    let amount = Long.fromString(this.amountHQT!, false)
     buffer.writeInt64(amount)
 
-    let fee = Long.fromString(this.feeHQT, false)
+    let fee = Long.fromString(this.feeHQT!, false)
     buffer.writeInt64(fee)
 
     for (let i = 0; i < 64; i++) buffer.writeByte(this.signature ? this.signature[i] : 0)
 
     buffer.writeInt(this.getFlags())
-    buffer.writeInt(this.ecBlockHeight)
+    buffer.writeInt(this.ecBlockHeight!)
 
-    let ecBlockId = Long.fromString(this.ecBlockId, true)
+    let ecBlockId = Long.fromString(this.ecBlockId!, true)
     buffer.writeInt64(ecBlockId)
 
     this.appendages.forEach(appendage => {
@@ -342,13 +343,13 @@ export class TransactionImpl {
     raw["timestamp"] = this.timestamp
     raw["deadline"] = this.deadline
     raw["senderPublicKey"] = this.senderPublicKey ? new Buffer(this.senderPublicKey) : new Buffer(0)
-    raw["recipientId"] = Long.fromString(this.recipientId, true)
-    raw["amountHQT"] = Long.fromString(this.amountHQT)
-    raw["feeHQT"] = Long.fromString(this.feeHQT)
+    raw["recipientId"] = Long.fromString(this.recipientId!, true)
+    raw["amountHQT"] = Long.fromString(this.amountHQT!)
+    raw["feeHQT"] = Long.fromString(this.feeHQT!)
     raw["signature"] = this.signature ? new Buffer(this.signature) : new Buffer(0)
     raw["flags"] = this.getFlags()
     raw["ecBlockHeight"] = this.ecBlockHeight
-    raw["ecBlockId"] = Long.fromString(this.ecBlockId, true)
+    raw["ecBlockId"] = Long.fromString(this.ecBlockId!, true)
     let attachment = this.appendages[0]
     if (attachment.getSize() > 0) {
       let attachmentBytes = ByteBuffer.allocate(attachment.getSize()).order(
@@ -379,7 +380,7 @@ export class TransactionImpl {
     json["subtype"] = this.type.getSubtype()
     json["timestamp"] = this.timestamp
     json["deadline"] = this.deadline
-    json["senderPublicKey"] = converters.byteArrayToHexString(this.senderPublicKey)
+    json["senderPublicKey"] = byteArrayToHexString(this.senderPublicKey!)
     if (this.type.canHaveRecipient()) {
       json["recipient"] = this.recipientId
     }
@@ -387,13 +388,13 @@ export class TransactionImpl {
     json["fee"] = this.feeHQT
     json["ecBlockHeight"] = this.ecBlockHeight
     json["ecBlockId"] = this.ecBlockId
-    json["signature"] = converters.byteArrayToHexString(this.signature)
+    json["signature"] = byteArrayToHexString(this.signature!)
 
     let attachmentJSON = {}
     this.appendages.forEach(appendage => {
-      utils.extend(attachmentJSON, appendage.getJSONObject())
+      extend(attachmentJSON, appendage.getJSONObject())
     })
-    if (!utils.isEmpty(attachmentJSON)) {
+    if (!isEmpty(attachmentJSON)) {
       json["attachment"] = attachmentJSON
     }
     json["version"] = this.version
@@ -401,11 +402,11 @@ export class TransactionImpl {
   }
 
   public verifySignature(): boolean {
-    if (!emptyArrayToNull(this.signature)) throw new Error("Transaction is not signed")
-    let signatureHex = converters.byteArrayToHexString(this.signature)
-    let bytesHex = converters.byteArrayToHexString(this.getUnsignedBytes())
-    let publicKeyHex = converters.byteArrayToHexString(this.senderPublicKey)
-    return crypto.verifyBytes(signatureHex, bytesHex, publicKeyHex)
+    if (!emptyArrayToNull(this.signature!)) throw new Error("Transaction is not signed")
+    let signatureHex = byteArrayToHexString(this.signature!)
+    let bytesHex = byteArrayToHexString(this.getUnsignedBytes())
+    let publicKeyHex = byteArrayToHexString(this.senderPublicKey!)
+    return verifyBytes(signatureHex, bytesHex, publicKeyHex)
   }
 
   public static parseJSON(json: { [key: string]: any }, isTestnet?: boolean) {
@@ -416,13 +417,13 @@ export class TransactionImpl {
     let deadline = json.deadline
     let senderPublicKey: number[] = []
     if (json.senderPublicKey)
-      senderPublicKey = converters.hexStringToByteArray(json.senderPublicKey)
+      senderPublicKey = hexStringToByteArray(json.senderPublicKey)
 
     let recipientId = Long.fromString(json.recipient, true)
     let amountHQT = Long.fromString(json.amount)
     let feeHQT = Long.fromString(json.fee)
     let signature: number[] = []
-    if (json.signature) signature = converters.hexStringToByteArray(json.signature)
+    if (json.signature) signature = hexStringToByteArray(json.signature)
     signature = <number[]>emptyArrayToNull(signature)
 
     let ecBlockHeight = json.ecBlockHeight
@@ -447,33 +448,33 @@ export class TransactionImpl {
       .isTestnet(!!isTestnet)
     if (transactionType.canHaveRecipient()) builder.recipientId(recipientId.toUnsigned().toString())
 
-    if (utils.isDefined(attachment["version.Message"]))
-      builder.message(new appendix.AppendixMessage().parseJSON(attachment))
-    if (utils.isDefined(attachment["version.EncryptedMessage"]))
-      builder.encryptedMessage(new appendix.AppendixEncryptedMessage().parseJSON(attachment))
-    if (utils.isDefined(attachment["version.PublicKeyAnnouncement"]))
+    if (isDefined(attachment["version.Message"]))
+      builder.message(new AppendixMessage().parseJSON(attachment))
+    if (isDefined(attachment["version.EncryptedMessage"]))
+      builder.encryptedMessage(new AppendixEncryptedMessage().parseJSON(attachment))
+    if (isDefined(attachment["version.PublicKeyAnnouncement"]))
       builder.publicKeyAnnouncement(
-        new appendix.AppendixPublicKeyAnnouncement().parseJSON(attachment)
+        new AppendixPublicKeyAnnouncement().parseJSON(attachment)
       )
-    if (utils.isDefined(attachment["version.EncryptToSelfMessage"]))
+    if (isDefined(attachment["version.EncryptToSelfMessage"]))
       builder.encryptToSelfMessage(
-        new appendix.AppendixEncryptToSelfMessage().parseJSON(attachment)
+        new AppendixEncryptToSelfMessage().parseJSON(attachment)
       )
-    if (utils.isDefined(attachment["version.PrivateNameAnnouncement"]))
+    if (isDefined(attachment["version.PrivateNameAnnouncement"]))
       builder.privateNameAnnouncement(
-        new appendix.AppendixPrivateNameAnnouncement().parseJSON(attachment)
+        new AppendixPrivateNameAnnouncement().parseJSON(attachment)
       )
-    if (utils.isDefined(attachment["version.PrivateNameAssignment"]))
+    if (isDefined(attachment["version.PrivateNameAssignment"]))
       builder.privateNameAssignment(
-        new appendix.AppendixPrivateNameAssignment().parseJSON(attachment)
+        new AppendixPrivateNameAssignment().parseJSON(attachment)
       )
-    if (utils.isDefined(attachment["version.PublicNameAnnouncement"]))
+    if (isDefined(attachment["version.PublicNameAnnouncement"]))
       builder.publicNameAnnouncement(
-        new appendix.AppendixPublicNameAnnouncement().parseJSON(attachment)
+        new AppendixPublicNameAnnouncement().parseJSON(attachment)
       )
-    if (utils.isDefined(attachment["version.PublicNameAssignment"]))
+    if (isDefined(attachment["version.PublicNameAssignment"]))
       builder.publicNameAssignment(
-        new appendix.AppendixPublicNameAssignment().parseJSON(attachment)
+        new AppendixPublicNameAssignment().parseJSON(attachment)
       )
 
     return new TransactionImpl(builder, null)
@@ -517,28 +518,28 @@ export class TransactionImpl {
     if (transactionType.canHaveRecipient()) builder.recipientId(recipientId.toUnsigned().toString())
 
     let position = 1
-    if ((flags & position) != 0) builder.message(new appendix.AppendixMessage().parse(buffer))
+    if ((flags & position) != 0) builder.message(new AppendixMessage().parse(buffer))
     position <<= 1
     if ((flags & position) != 0)
-      builder.encryptedMessage(new appendix.AppendixEncryptedMessage().parse(buffer))
+      builder.encryptedMessage(new AppendixEncryptedMessage().parse(buffer))
     position <<= 1
     if ((flags & position) != 0)
-      builder.publicKeyAnnouncement(new appendix.AppendixPublicKeyAnnouncement().parse(buffer))
+      builder.publicKeyAnnouncement(new AppendixPublicKeyAnnouncement().parse(buffer))
     position <<= 1
     if ((flags & position) != 0)
-      builder.encryptToSelfMessage(new appendix.AppendixEncryptToSelfMessage().parse(buffer))
+      builder.encryptToSelfMessage(new AppendixEncryptToSelfMessage().parse(buffer))
     position <<= 1
     if ((flags & position) != 0)
-      builder.privateNameAnnouncement(new appendix.AppendixPrivateNameAnnouncement().parse(buffer))
+      builder.privateNameAnnouncement(new AppendixPrivateNameAnnouncement().parse(buffer))
     position <<= 1
     if ((flags & position) != 0)
-      builder.privateNameAssignment(new appendix.AppendixPrivateNameAssignment().parse(buffer))
+      builder.privateNameAssignment(new AppendixPrivateNameAssignment().parse(buffer))
     position <<= 1
     if ((flags & position) != 0)
-      builder.publicNameAnnouncement(new appendix.AppendixPublicNameAnnouncement().parse(buffer))
+      builder.publicNameAnnouncement(new AppendixPublicNameAnnouncement().parse(buffer))
     position <<= 1
     if ((flags & position) != 0)
-      builder.publicNameAssignment(new appendix.AppendixPublicNameAssignment().parse(buffer))
+      builder.publicNameAssignment(new AppendixPublicNameAssignment().parse(buffer))
     if (isTestnet) buffer.readLong()
 
     return new TransactionImpl(builder, null)
@@ -546,7 +547,7 @@ export class TransactionImpl {
 }
 
 function emptyArrayToNull(array: number[]) {
-  if (array == null) return null
+  if (array == null || array == undefined) return null
   for (let i = 0; i < array.length; i++) {
     if (array[i] != 0) return array
   }

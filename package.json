@@ -1,0 +1,53 @@
+{
+  "name": "heat-sdk-v2",
+  "version": "1.0.0",
+  "description": "HEAT support libraries for Node.js",
+  "keywords": [
+    "heat",
+    "heatledger",
+    "heat-sdk",
+    "blockchain",
+    "websocket",
+    "nodejs",
+    "npm-package",
+    "typescript",
+    "javascript",
+    "cryptography",
+    "microservices"
+  ],
+  "main": "./dist/heat-sdk",
+  "browser": "./dist/heat-sdk.umd.js",
+  "types": "./dist/heat-sdk.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "Dennis de Klerk <dennis@heatledger.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heatcrypto/heat-sdk-v2"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "rollup -c && rimraf compiled && typedoc --sourcefile-url-prefix 'https://github.com/Heat-Ledger-Ltd/heat-sdk/blob/master/src/' --out dist/docs --target es6 --theme minimal src",
+    "buildfast": "rimraf dist && rollup -c && rimraf compiled",
+    "start": "rollup -c -w",
+    "test": "jest --forceExit",
+    "test:watch": "jest --watch",
+    "test:prod": "npm run test",
+    "tsc": "tsc ./src/heat-sdk.ts"
+  },
+  "devDependencies": {
+    "@types/bytebuffer": "^5.0.41",
+    "@types/long": "^4.0.1",
+    "long": "^4.0.0",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "bytebuffer": "^5.0.1"
+  }
+}

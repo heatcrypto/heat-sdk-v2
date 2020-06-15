@@ -22,7 +22,7 @@
  * */
 import Big from "big.js"
 import { hexStringToByteArray } from "./converters"
-import * as ByteBuffer from "bytebuffer"
+import ByteBuffer from "bytebuffer"
 
 export function isPublicKey(publicKeyHex: string): boolean {
   // if (parseInt(publicKeyHex, 16).toString(16) === publicKeyHex.toLowerCase()) {

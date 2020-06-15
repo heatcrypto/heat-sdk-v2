@@ -16,8 +16,6 @@
     "microservices"
   ],
   "main": "./dist/heat-sdk",
-  "browser": "./dist/heat-sdk.umd.js",
-  "types": "./dist/heat-sdk.d.ts",
   "files": [
     "dist"
   ],
@@ -32,7 +30,7 @@
   },
   "scripts": {
     "test": "jest --forceExit",
-    "tsc": "tsc ./src/heat-sdk.ts"
+    "tsc": "rimraf dist && tsc --project tsconfig.json"
   },
   "devDependencies": {
     "@types/big.js": "^4.0.5",
@@ -43,6 +41,7 @@
     "@types/pako": "^1.0.1",
     "jest": "^26.0.1",
     "node-fetch": "^2.6.0",
+    "rimraf": "^3.0.2",
     "ts-jest": "^26.1.0",
     "tslint": "^6.1.2",
     "typescript": "^3.9.5"

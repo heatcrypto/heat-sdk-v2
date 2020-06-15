@@ -24,7 +24,7 @@ import "./jasmine"
 import { calculateStringHash, calculateFullHash, fullNameToHash, fullNameToLong, calculateTransactionId, secretPhraseToPublicKey, getPrivateKey, getAccountId, getAccountIdFromPublicKey, signBytes, verifyBytes, encryptNote, decryptMessage, encryptBinaryNote, encryptMessage, passphraseEncrypt, passphraseDecrypt, random8Values, random16Values, random32Values } from "../src/crypto"
 import { IEncryptOptions } from "../src/crypto"
 import { hexStringToByteArray, stringToByteArray } from "../src/converters"
-import Long from "long"
+import * as Long from "long"
 
 let bob = {
   secretPhrase: "floor battle paper consider stranger blind alter blur bless wrote prove cloud",

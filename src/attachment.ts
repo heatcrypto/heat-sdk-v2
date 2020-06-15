@@ -26,7 +26,7 @@ import { stringToByteArray, byteArrayToString, hexStringToByteArray, byteArrayTo
 import { readBytes, writeBytes } from "./utils"
 import { Fee } from "./fee"
 import Long from "long"
-import * as ByteBuffer from "bytebuffer"
+import ByteBuffer from "bytebuffer"
 
 export interface Attachment extends Appendix {
   getTransactionType(): TransactionType

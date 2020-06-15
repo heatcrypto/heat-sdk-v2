@@ -1,4 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -42,9 +55,11 @@ exports.EFFECTIVE_BALANCE_LEASING_TRANSACTION_TYPE = exports.WHITELIST_MARKET_TR
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-const attachment = __importStar(require("./attachment"));
-class TransactionType {
-    static findTransactionType(type, subtype) {
+var attachment = __importStar(require("./attachment"));
+var TransactionType = /** @class */ (function () {
+    function TransactionType() {
+    }
+    TransactionType.findTransactionType = function (type, subtype) {
         if (type == this.TYPE_PAYMENT) {
             if (subtype == this.SUBTYPE_PAYMENT_ORDINARY_PAYMENT) {
                 return exports.ORDINARY_PAYMENT_TRANSACTION_TYPE;
@@ -83,259 +98,355 @@ class TransactionType {
             if (subtype == this.SUBTYPE_ACCOUNT_CONTROL_EFFECTIVE_BALANCE_LEASING)
                 return exports.EFFECTIVE_BALANCE_LEASING_TRANSACTION_TYPE;
         }
-    }
-    mustHaveRecipient() {
+    };
+    TransactionType.prototype.mustHaveRecipient = function () {
         return this.canHaveRecipient();
-    }
-}
+    };
+    TransactionType.TYPE_PAYMENT = 0;
+    TransactionType.TYPE_MESSAGING = 1;
+    TransactionType.TYPE_COLORED_COINS = 2;
+    TransactionType.TYPE_ACCOUNT_CONTROL = 4;
+    TransactionType.SUBTYPE_PAYMENT_ORDINARY_PAYMENT = 0;
+    TransactionType.SUBTYPE_MESSAGING_ARBITRARY_MESSAGE = 0;
+    TransactionType.SUBTYPE_COLORED_COINS_ASSET_ISSUANCE = 0;
+    TransactionType.SUBTYPE_COLORED_COINS_ASSET_ISSUE_MORE = 1;
+    TransactionType.SUBTYPE_COLORED_COINS_ASSET_TRANSFER = 2;
+    TransactionType.SUBTYPE_COLORED_COINS_ASK_ORDER_PLACEMENT = 3;
+    TransactionType.SUBTYPE_COLORED_COINS_BID_ORDER_PLACEMENT = 4;
+    TransactionType.SUBTYPE_COLORED_COINS_ASK_ORDER_CANCELLATION = 5;
+    TransactionType.SUBTYPE_COLORED_COINS_BID_ORDER_CANCELLATION = 6;
+    TransactionType.SUBTYPE_COLORED_COINS_WHITELIST_ACCOUNT_ADDITION = 7;
+    TransactionType.SUBTYPE_COLORED_COINS_WHITELIST_ACCOUNT_REMOVAL = 8;
+    TransactionType.SUBTYPE_COLORED_COINS_WHITELIST_MARKET = 9;
+    TransactionType.SUBTYPE_COLORED_COINS_ATOMIC_MULTI_TRANSFER = 10;
+    TransactionType.SUBTYPE_ACCOUNT_CONTROL_EFFECTIVE_BALANCE_LEASING = 0;
+    return TransactionType;
+}());
 exports.TransactionType = TransactionType;
-TransactionType.TYPE_PAYMENT = 0;
-TransactionType.TYPE_MESSAGING = 1;
-TransactionType.TYPE_COLORED_COINS = 2;
-TransactionType.TYPE_ACCOUNT_CONTROL = 4;
-TransactionType.SUBTYPE_PAYMENT_ORDINARY_PAYMENT = 0;
-TransactionType.SUBTYPE_MESSAGING_ARBITRARY_MESSAGE = 0;
-TransactionType.SUBTYPE_COLORED_COINS_ASSET_ISSUANCE = 0;
-TransactionType.SUBTYPE_COLORED_COINS_ASSET_ISSUE_MORE = 1;
-TransactionType.SUBTYPE_COLORED_COINS_ASSET_TRANSFER = 2;
-TransactionType.SUBTYPE_COLORED_COINS_ASK_ORDER_PLACEMENT = 3;
-TransactionType.SUBTYPE_COLORED_COINS_BID_ORDER_PLACEMENT = 4;
-TransactionType.SUBTYPE_COLORED_COINS_ASK_ORDER_CANCELLATION = 5;
-TransactionType.SUBTYPE_COLORED_COINS_BID_ORDER_CANCELLATION = 6;
-TransactionType.SUBTYPE_COLORED_COINS_WHITELIST_ACCOUNT_ADDITION = 7;
-TransactionType.SUBTYPE_COLORED_COINS_WHITELIST_ACCOUNT_REMOVAL = 8;
-TransactionType.SUBTYPE_COLORED_COINS_WHITELIST_MARKET = 9;
-TransactionType.SUBTYPE_COLORED_COINS_ATOMIC_MULTI_TRANSFER = 10;
-TransactionType.SUBTYPE_ACCOUNT_CONTROL_EFFECTIVE_BALANCE_LEASING = 0;
-class OrdinaryPayment extends TransactionType {
-    getType() {
+var OrdinaryPayment = /** @class */ (function (_super) {
+    __extends(OrdinaryPayment, _super);
+    function OrdinaryPayment() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    OrdinaryPayment.prototype.getType = function () {
         return TransactionType.TYPE_PAYMENT;
-    }
-    getSubtype() {
+    };
+    OrdinaryPayment.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_PAYMENT_ORDINARY_PAYMENT;
-    }
-    parseAttachment(buffer) {
+    };
+    OrdinaryPayment.prototype.parseAttachment = function (buffer) {
         buffer.offset++; // advance the buffer position past the version byte
         return attachment.ORDINARY_PAYMENT;
-    }
-    parseAttachmentJSON(json) {
+    };
+    OrdinaryPayment.prototype.parseAttachmentJSON = function (json) {
         return attachment.ORDINARY_PAYMENT;
-    }
-    canHaveRecipient() {
+    };
+    OrdinaryPayment.prototype.canHaveRecipient = function () {
         return true;
-    }
-}
+    };
+    return OrdinaryPayment;
+}(TransactionType));
 exports.OrdinaryPayment = OrdinaryPayment;
-class ArbitraryMessage extends TransactionType {
-    getType() {
+var ArbitraryMessage = /** @class */ (function (_super) {
+    __extends(ArbitraryMessage, _super);
+    function ArbitraryMessage() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ArbitraryMessage.prototype.getType = function () {
         return TransactionType.TYPE_MESSAGING;
-    }
-    getSubtype() {
+    };
+    ArbitraryMessage.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_MESSAGING_ARBITRARY_MESSAGE;
-    }
-    parseAttachment(buffer) {
+    };
+    ArbitraryMessage.prototype.parseAttachment = function (buffer) {
         buffer.offset++; // advance the buffer position past the version byte
         return attachment.ARBITRARY_MESSAGE;
-    }
-    parseAttachmentJSON(json) {
+    };
+    ArbitraryMessage.prototype.parseAttachmentJSON = function (json) {
         return attachment.ARBITRARY_MESSAGE;
-    }
-    canHaveRecipient() {
+    };
+    ArbitraryMessage.prototype.canHaveRecipient = function () {
         return true;
-    }
-    mustHaveRecipient() {
+    };
+    ArbitraryMessage.prototype.mustHaveRecipient = function () {
         return false;
-    }
-}
+    };
+    return ArbitraryMessage;
+}(TransactionType));
 exports.ArbitraryMessage = ArbitraryMessage;
-class ColoredCoins extends TransactionType {
-    getType() {
+var ColoredCoins = /** @class */ (function (_super) {
+    __extends(ColoredCoins, _super);
+    function ColoredCoins() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoins.prototype.getType = function () {
         return TransactionType.TYPE_COLORED_COINS;
-    }
-}
+    };
+    return ColoredCoins;
+}(TransactionType));
 exports.ColoredCoins = ColoredCoins;
-class AssetIssuance extends ColoredCoins {
-    getSubtype() {
+var AssetIssuance = /** @class */ (function (_super) {
+    __extends(AssetIssuance, _super);
+    function AssetIssuance() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AssetIssuance.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_ASSET_ISSUANCE;
-    }
-    parseAttachment(buffer) {
+    };
+    AssetIssuance.prototype.parseAttachment = function (buffer) {
         return new attachment.AssetIssuance().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    AssetIssuance.prototype.parseAttachmentJSON = function (json) {
         return new attachment.AssetIssuance().parseJSON(json);
-    }
-    canHaveRecipient() {
+    };
+    AssetIssuance.prototype.canHaveRecipient = function () {
         return false;
-    }
-}
+    };
+    return AssetIssuance;
+}(ColoredCoins));
 exports.AssetIssuance = AssetIssuance;
-class AssetIssueMore extends ColoredCoins {
-    getSubtype() {
+var AssetIssueMore = /** @class */ (function (_super) {
+    __extends(AssetIssueMore, _super);
+    function AssetIssueMore() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AssetIssueMore.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_ASSET_ISSUE_MORE;
-    }
-    parseAttachment(buffer) {
+    };
+    AssetIssueMore.prototype.parseAttachment = function (buffer) {
         return new attachment.AssetIssueMore().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    AssetIssueMore.prototype.parseAttachmentJSON = function (json) {
         return new attachment.AssetIssueMore().parseJSON(json);
-    }
-    canHaveRecipient() {
+    };
+    AssetIssueMore.prototype.canHaveRecipient = function () {
         return false;
-    }
-}
+    };
+    return AssetIssueMore;
+}(ColoredCoins));
 exports.AssetIssueMore = AssetIssueMore;
-class AssetTransfer extends ColoredCoins {
-    getSubtype() {
+var AssetTransfer = /** @class */ (function (_super) {
+    __extends(AssetTransfer, _super);
+    function AssetTransfer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AssetTransfer.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_ASSET_TRANSFER;
-    }
-    parseAttachment(buffer) {
+    };
+    AssetTransfer.prototype.parseAttachment = function (buffer) {
         return new attachment.AssetTransfer().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    AssetTransfer.prototype.parseAttachmentJSON = function (json) {
         return new attachment.AssetTransfer().parseJSON(json);
-    }
-    canHaveRecipient() {
+    };
+    AssetTransfer.prototype.canHaveRecipient = function () {
         return true;
-    }
-}
+    };
+    return AssetTransfer;
+}(ColoredCoins));
 exports.AssetTransfer = AssetTransfer;
-class AtomicMultiTransfer extends ColoredCoins {
-    getSubtype() {
+var AtomicMultiTransfer = /** @class */ (function (_super) {
+    __extends(AtomicMultiTransfer, _super);
+    function AtomicMultiTransfer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AtomicMultiTransfer.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_ATOMIC_MULTI_TRANSFER;
-    }
-    parseAttachment(buffer) {
+    };
+    AtomicMultiTransfer.prototype.parseAttachment = function (buffer) {
         return new attachment.AtomicMultiTransfer().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    AtomicMultiTransfer.prototype.parseAttachmentJSON = function (json) {
         return new attachment.AtomicMultiTransfer().parseJSON(json);
-    }
-    canHaveRecipient() {
+    };
+    AtomicMultiTransfer.prototype.canHaveRecipient = function () {
         return true;
-    }
-}
+    };
+    return AtomicMultiTransfer;
+}(ColoredCoins));
 exports.AtomicMultiTransfer = AtomicMultiTransfer;
-class ColoredCoinsOrderPlacement extends ColoredCoins {
-    canHaveRecipient() {
-        return false;
+var ColoredCoinsOrderPlacement = /** @class */ (function (_super) {
+    __extends(ColoredCoinsOrderPlacement, _super);
+    function ColoredCoinsOrderPlacement() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-}
+    ColoredCoinsOrderPlacement.prototype.canHaveRecipient = function () {
+        return false;
+    };
+    return ColoredCoinsOrderPlacement;
+}(ColoredCoins));
 exports.ColoredCoinsOrderPlacement = ColoredCoinsOrderPlacement;
-class AskOrderPlacement extends ColoredCoinsOrderPlacement {
-    getSubtype() {
+var AskOrderPlacement = /** @class */ (function (_super) {
+    __extends(AskOrderPlacement, _super);
+    function AskOrderPlacement() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AskOrderPlacement.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_ASK_ORDER_PLACEMENT;
-    }
-    parseAttachment(buffer) {
+    };
+    AskOrderPlacement.prototype.parseAttachment = function (buffer) {
         return new attachment.ColoredCoinsAskOrderPlacement().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    AskOrderPlacement.prototype.parseAttachmentJSON = function (json) {
         return new attachment.ColoredCoinsAskOrderPlacement().parseJSON(json);
-    }
-}
+    };
+    return AskOrderPlacement;
+}(ColoredCoinsOrderPlacement));
 exports.AskOrderPlacement = AskOrderPlacement;
-class BidOrderPlacement extends ColoredCoinsOrderPlacement {
-    getSubtype() {
+var BidOrderPlacement = /** @class */ (function (_super) {
+    __extends(BidOrderPlacement, _super);
+    function BidOrderPlacement() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    BidOrderPlacement.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_BID_ORDER_PLACEMENT;
-    }
-    parseAttachment(buffer) {
+    };
+    BidOrderPlacement.prototype.parseAttachment = function (buffer) {
         return new attachment.ColoredCoinsBidOrderPlacement().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    BidOrderPlacement.prototype.parseAttachmentJSON = function (json) {
         return new attachment.ColoredCoinsBidOrderPlacement().parseJSON(json);
-    }
-}
+    };
+    return BidOrderPlacement;
+}(ColoredCoinsOrderPlacement));
 exports.BidOrderPlacement = BidOrderPlacement;
-class ColoredCoinsOrderCancellation extends ColoredCoins {
-    canHaveRecipient() {
-        return false;
+var ColoredCoinsOrderCancellation = /** @class */ (function (_super) {
+    __extends(ColoredCoinsOrderCancellation, _super);
+    function ColoredCoinsOrderCancellation() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-}
+    ColoredCoinsOrderCancellation.prototype.canHaveRecipient = function () {
+        return false;
+    };
+    return ColoredCoinsOrderCancellation;
+}(ColoredCoins));
 exports.ColoredCoinsOrderCancellation = ColoredCoinsOrderCancellation;
-class AskOrderCancellation extends ColoredCoinsOrderCancellation {
-    getSubtype() {
+var AskOrderCancellation = /** @class */ (function (_super) {
+    __extends(AskOrderCancellation, _super);
+    function AskOrderCancellation() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AskOrderCancellation.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_ASK_ORDER_CANCELLATION;
-    }
-    parseAttachment(buffer) {
+    };
+    AskOrderCancellation.prototype.parseAttachment = function (buffer) {
         return new attachment.ColoredCoinsAskOrderCancellation().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    AskOrderCancellation.prototype.parseAttachmentJSON = function (json) {
         return new attachment.ColoredCoinsAskOrderCancellation().parseJSON(json);
-    }
-}
+    };
+    return AskOrderCancellation;
+}(ColoredCoinsOrderCancellation));
 exports.AskOrderCancellation = AskOrderCancellation;
-class BidOrderCancellation extends ColoredCoinsOrderCancellation {
-    getSubtype() {
+var BidOrderCancellation = /** @class */ (function (_super) {
+    __extends(BidOrderCancellation, _super);
+    function BidOrderCancellation() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    BidOrderCancellation.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_BID_ORDER_CANCELLATION;
-    }
-    parseAttachment(buffer) {
+    };
+    BidOrderCancellation.prototype.parseAttachment = function (buffer) {
         return new attachment.ColoredCoinsBidOrderCancellation().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    BidOrderCancellation.prototype.parseAttachmentJSON = function (json) {
         return new attachment.ColoredCoinsBidOrderCancellation().parseJSON(json);
-    }
-}
+    };
+    return BidOrderCancellation;
+}(ColoredCoinsOrderCancellation));
 exports.BidOrderCancellation = BidOrderCancellation;
-class ColoredCoinsWhitelist extends ColoredCoins {
-    canHaveRecipient() {
+var ColoredCoinsWhitelist = /** @class */ (function (_super) {
+    __extends(ColoredCoinsWhitelist, _super);
+    function ColoredCoinsWhitelist() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsWhitelist.prototype.canHaveRecipient = function () {
         return false;
-    }
-}
+    };
+    return ColoredCoinsWhitelist;
+}(ColoredCoins));
 exports.ColoredCoinsWhitelist = ColoredCoinsWhitelist;
-class WhitelistAccountAddition extends ColoredCoinsWhitelist {
-    getSubtype() {
+var WhitelistAccountAddition = /** @class */ (function (_super) {
+    __extends(WhitelistAccountAddition, _super);
+    function WhitelistAccountAddition() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    WhitelistAccountAddition.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_WHITELIST_ACCOUNT_ADDITION;
-    }
-    parseAttachment(buffer) {
+    };
+    WhitelistAccountAddition.prototype.parseAttachment = function (buffer) {
         return new attachment.ColoredCoinsWhitelistAccountAddition().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    WhitelistAccountAddition.prototype.parseAttachmentJSON = function (json) {
         return new attachment.ColoredCoinsWhitelistAccountAddition().parseJSON(json);
-    }
-}
+    };
+    return WhitelistAccountAddition;
+}(ColoredCoinsWhitelist));
 exports.WhitelistAccountAddition = WhitelistAccountAddition;
-class WhitelistAccountRemoval extends ColoredCoinsWhitelist {
-    getSubtype() {
+var WhitelistAccountRemoval = /** @class */ (function (_super) {
+    __extends(WhitelistAccountRemoval, _super);
+    function WhitelistAccountRemoval() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    WhitelistAccountRemoval.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_WHITELIST_ACCOUNT_REMOVAL;
-    }
-    parseAttachment(buffer) {
+    };
+    WhitelistAccountRemoval.prototype.parseAttachment = function (buffer) {
         return new attachment.ColoredCoinsWhitelistAccountRemoval().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    WhitelistAccountRemoval.prototype.parseAttachmentJSON = function (json) {
         return new attachment.ColoredCoinsWhitelistAccountRemoval().parseJSON(json);
-    }
-}
+    };
+    return WhitelistAccountRemoval;
+}(ColoredCoinsWhitelist));
 exports.WhitelistAccountRemoval = WhitelistAccountRemoval;
-class WhitelistMarket extends ColoredCoinsWhitelist {
-    getSubtype() {
+var WhitelistMarket = /** @class */ (function (_super) {
+    __extends(WhitelistMarket, _super);
+    function WhitelistMarket() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    WhitelistMarket.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_COLORED_COINS_WHITELIST_MARKET;
-    }
-    parseAttachment(buffer) {
+    };
+    WhitelistMarket.prototype.parseAttachment = function (buffer) {
         return new attachment.ColoredCoinsWhitelistMarket().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    WhitelistMarket.prototype.parseAttachmentJSON = function (json) {
         return new attachment.ColoredCoinsWhitelistMarket().parseJSON(json);
-    }
-}
+    };
+    return WhitelistMarket;
+}(ColoredCoinsWhitelist));
 exports.WhitelistMarket = WhitelistMarket;
-class AccountControl extends TransactionType {
-    getType() {
+var AccountControl = /** @class */ (function (_super) {
+    __extends(AccountControl, _super);
+    function AccountControl() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AccountControl.prototype.getType = function () {
         return TransactionType.TYPE_ACCOUNT_CONTROL;
-    }
-    canHaveRecipient() {
+    };
+    AccountControl.prototype.canHaveRecipient = function () {
         return true;
-    }
-}
+    };
+    return AccountControl;
+}(TransactionType));
 exports.AccountControl = AccountControl;
-class EffectiveBalanceLeasing extends AccountControl {
-    getSubtype() {
+var EffectiveBalanceLeasing = /** @class */ (function (_super) {
+    __extends(EffectiveBalanceLeasing, _super);
+    function EffectiveBalanceLeasing() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    EffectiveBalanceLeasing.prototype.getSubtype = function () {
         return TransactionType.SUBTYPE_ACCOUNT_CONTROL_EFFECTIVE_BALANCE_LEASING;
-    }
-    parseAttachment(buffer) {
+    };
+    EffectiveBalanceLeasing.prototype.parseAttachment = function (buffer) {
         return new attachment.AccountControlEffectiveBalanceLeasing().parse(buffer);
-    }
-    parseAttachmentJSON(json) {
+    };
+    EffectiveBalanceLeasing.prototype.parseAttachmentJSON = function (json) {
         return new attachment.AccountControlEffectiveBalanceLeasing().parseJSON(json);
-    }
-}
+    };
+    return EffectiveBalanceLeasing;
+}(AccountControl));
 exports.EffectiveBalanceLeasing = EffectiveBalanceLeasing;
 exports.ORDINARY_PAYMENT_TRANSACTION_TYPE = new OrdinaryPayment();
 exports.ARBITRARY_MESSAGE_TRANSACTION_TYPE = new ArbitraryMessage();

@@ -23,11 +23,11 @@ exports.randomBytes = void 0;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-const crypto_1 = require("crypto");
+var crypto_1 = require("crypto");
 function randomBytes(length) {
-    return new Promise((resolve, reject) => {
+    return new Promise(function (resolve, reject) {
         // Buffers are Uint8Arrays, so you just need to access its ArrayBuffer. This is O(1):
-        crypto_1.randomBytes(length, (err, buffer) => {
+        crypto_1.randomBytes(length, function (err, buffer) {
             if (err)
                 reject(err);
             else

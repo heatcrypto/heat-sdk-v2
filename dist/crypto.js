@@ -26,11 +26,11 @@ exports.passphraseDecrypt = exports.passphraseEncrypt = exports.PassphraseEncryp
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-const converters_1 = require("./converters");
-const big_js_1 = __importDefault(require("big.js"));
-const pako_1 = require("pako");
-const long_1 = __importDefault(require("long"));
-const random_bytes_1 = require("./random-bytes");
+var converters_1 = require("./converters");
+var big_js_1 = __importDefault(require("big.js"));
+var pako_1 = require("pako");
+var long_1 = __importDefault(require("long"));
+var random_bytes_1 = require("./random-bytes");
 var _hash = {
     init: SHA256_init,
     update: SHA256_write,
@@ -42,11 +42,11 @@ function random8Values(len) {
 }
 exports.random8Values = random8Values;
 function random16Values(len) {
-    return random_bytes_1.randomBytes(len * 2).then(bytes => new Uint16Array(bytes.buffer));
+    return random_bytes_1.randomBytes(len * 2).then(function (bytes) { return new Uint16Array(bytes.buffer); });
 }
 exports.random16Values = random16Values;
 function random32Values(len) {
-    return random_bytes_1.randomBytes(len * 4).then(bytes => new Uint32Array(bytes.buffer));
+    return random_bytes_1.randomBytes(len * 4).then(function (bytes) { return new Uint32Array(bytes.buffer); });
 }
 exports.random32Values = random32Values;
 function simpleHash(message) {
@@ -69,7 +69,7 @@ function calculateStringHash(inputString) {
 exports.calculateStringHash = calculateStringHash;
 function calculateHashBytes(bytes) {
     _hash.init();
-    bytes.forEach(b => _hash.update(b));
+    bytes.forEach(function (b) { return _hash.update(b); });
     return _hash.getBytes();
 }
 exports.calculateHashBytes = calculateHashBytes;
@@ -255,7 +255,7 @@ function encryptNote(message, options, secretPhrase, uncompressed) {
             throw new Error("Missing publicKey argument");
         }
     }
-    return encryptData(converters_1.stringToByteArray(message), options, uncompressed).then(encrypted => {
+    return encryptData(converters_1.stringToByteArray(message), options, uncompressed).then(function (encrypted) {
         return {
             message: converters_1.byteArrayToHexString(encrypted.data),
             nonce: converters_1.byteArrayToHexString(encrypted.nonce)
@@ -281,7 +281,7 @@ function encryptBinaryNote(message, options, secretPhrase, uncompressed) {
             throw new Error("Missing publicKey argument");
         }
     }
-    return encryptData(message, options, uncompressed).then(encrypted => {
+    return encryptData(message, options, uncompressed).then(function (encrypted) {
         return {
             message: converters_1.byteArrayToHexString(encrypted.data),
             nonce: converters_1.byteArrayToHexString(encrypted.nonce)
@@ -299,7 +299,7 @@ function getSharedKey(key1, key2) {
 }
 function encryptData(plaintext, options, uncompressed) {
     return random_bytes_1.randomBytes(32)
-        .then(bytes => {
+        .then(function (bytes) {
         if (!options.sharedKey) {
             options.sharedKey = getSharedKey(options.privateKey, options.publicKey);
         }
@@ -309,7 +309,7 @@ function encryptData(plaintext, options, uncompressed) {
             : pako_1.gzip(new Uint8Array(plaintext));
         return aesEncrypt(compressedPlaintext, options);
     })
-        .then(data => {
+        .then(function (data) {
         return {
             nonce: options.nonce,
             data: data
@@ -317,7 +317,7 @@ function encryptData(plaintext, options, uncompressed) {
     });
 }
 function aesEncrypt(plaintext, options) {
-    return random_bytes_1.randomBytes(16).then(bytes => {
+    return random_bytes_1.randomBytes(16).then(function (bytes) {
         var text = converters_1.byteArrayToWordArray(plaintext);
         var sharedKey = options.sharedKey
             ? options.sharedKey.slice(0)
@@ -341,7 +341,7 @@ function encryptMessage(message, publicKey, secretPhrase, uncompressed) {
         account: getAccountIdFromPublicKey(publicKey),
         publicKey: converters_1.hexStringToByteArray(publicKey)
     };
-    return encryptNote(message, options, secretPhrase, uncompressed).then(encrypted => {
+    return encryptNote(message, options, secretPhrase, uncompressed).then(function (encrypted) {
         return {
             isText: true,
             data: encrypted.message,
@@ -406,21 +406,22 @@ function aesDecrypt(ivCiphertext, options) {
     var plaintext = converters_1.wordArrayToByteArray(decrypted);
     return plaintext;
 }
-class PassphraseEncryptedMessage {
-    constructor(ciphertext, salt, iv, HMAC) {
+var PassphraseEncryptedMessage = /** @class */ (function () {
+    function PassphraseEncryptedMessage(ciphertext, salt, iv, HMAC) {
         this.ciphertext = ciphertext;
         this.salt = salt;
         this.iv = iv;
         this.HMAC = HMAC;
     }
-    static decode(encoded) {
+    PassphraseEncryptedMessage.decode = function (encoded) {
         var json = JSON.parse(encoded);
         return new PassphraseEncryptedMessage(json[0], json[1], json[2], json[3]);
-    }
-    encode() {
+    };
+    PassphraseEncryptedMessage.prototype.encode = function () {
         return JSON.stringify([this.ciphertext, this.salt, this.iv, this.HMAC]);
-    }
-}
+    };
+    return PassphraseEncryptedMessage;
+}());
 exports.PassphraseEncryptedMessage = PassphraseEncryptedMessage;
 function passphraseEncrypt(message, passphrase) {
     var salt = CryptoJS.lib.WordArray.random(256 / 8);
@@ -2218,9 +2219,9 @@ function HMAC_SHA256_init(key) {
         SHA256_write(HMAC_SHA256_key);
         HMAC_SHA256_key = SHA256_finalize();
     }
-    for (let i = HMAC_SHA256_key.length; i < 64; i++)
+    for (var i = HMAC_SHA256_key.length; i < 64; i++)
         HMAC_SHA256_key[i] = 0;
-    for (let i = 0; i < 64; i++)
+    for (var i = 0; i < 64; i++)
         HMAC_SHA256_key[i] ^= 0x36;
     SHA256_init();
     SHA256_write(HMAC_SHA256_key);
@@ -2301,8 +2302,11 @@ code.google.com/p/crypto-js
 code.google.com/p/crypto-js/wiki/License
 */
 var CryptoJS = (function (u, p) {
-    var d = {}, l = (d.lib = {}), s = class {
-    }, t = (l.Base = {
+    var d = {}, l = (d.lib = {}), s = /** @class */ (function () {
+        function s() {
+        }
+        return s;
+    }()), t = (l.Base = {
         extend: function (a) {
             s.prototype = this;
             var c = new s();
@@ -2530,8 +2534,8 @@ var CryptoJS = (function (u, p) {
             this._hash = new w.init([1732584193, 4023233417, 2562383102, 271733878]);
         },
         _doProcessBlock: function (q, n) {
-            for (let a = 0; 16 > a; a++) {
-                var c = n + a, e = q[c];
+            for (var a_1 = 0; 16 > a_1; a_1++) {
+                var c = n + a_1, e = q[c];
                 q[c] = (((e << 8) | (e >>> 24)) & 16711935) | (((e << 24) | (e >>> 8)) & 4278255360);
             }
             var a = this._hash.words, c = q[n + 0], e = q[n + 1], j = q[n + 2], k = q[n + 3], z = q[n + 4], r = q[n + 5], t = q[n + 6], w = q[n + 7], v = q[n + 8], A = q[n + 9], B = q[n + 10], C = q[n + 11], u = q[n + 12], D = q[n + 13], E = q[n + 14], x = q[n + 15], f = a[0], m = a[1], g = a[2], h = a[3], f = p(f, m, g, h, c, 7, b[0]), h = p(h, f, m, g, e, 12, b[1]), g = p(g, h, f, m, j, 17, b[2]), m = p(m, g, h, f, k, 22, b[3]), f = p(f, m, g, h, z, 7, b[4]), h = p(h, f, m, g, r, 12, b[5]), g = p(g, h, f, m, t, 17, b[6]), m = p(m, g, h, f, w, 22, b[7]), f = p(f, m, g, h, v, 7, b[8]), h = p(h, f, m, g, A, 12, b[9]), g = p(g, h, f, m, B, 17, b[10]), m = p(m, g, h, f, C, 22, b[11]), f = p(f, m, g, h, u, 7, b[12]), h = p(h, f, m, g, D, 12, b[13]), g = p(g, h, f, m, E, 17, b[14]), m = p(m, g, h, f, x, 22, b[15]), f = d(f, m, g, h, e, 5, b[16]), h = d(h, f, m, g, t, 9, b[17]), g = d(g, h, f, m, C, 14, b[18]), m = d(m, g, h, f, c, 20, b[19]), f = d(f, m, g, h, r, 5, b[20]), h = d(h, f, m, g, B, 9, b[21]), g = d(g, h, f, m, x, 14, b[22]), m = d(m, g, h, f, z, 20, b[23]), f = d(f, m, g, h, A, 5, b[24]), h = d(h, f, m, g, E, 9, b[25]), g = d(g, h, f, m, k, 14, b[26]), m = d(m, g, h, f, v, 20, b[27]), f = d(f, m, g, h, D, 5, b[28]), h = d(h, f, m, g, j, 9, b[29]), g = d(g, h, f, m, w, 14, b[30]), m = d(m, g, h, f, u, 20, b[31]), f = l(f, m, g, h, r, 4, b[32]), h = l(h, f, m, g, v, 11, b[33]), g = l(g, h, f, m, C, 16, b[34]), m = l(m, g, h, f, E, 23, b[35]), f = l(f, m, g, h, e, 4, b[36]), h = l(h, f, m, g, z, 11, b[37]), g = l(g, h, f, m, w, 16, b[38]), m = l(m, g, h, f, B, 23, b[39]), f = l(f, m, g, h, D, 4, b[40]), h = l(h, f, m, g, c, 11, b[41]), g = l(g, h, f, m, k, 16, b[42]), m = l(m, g, h, f, t, 23, b[43]), f = l(f, m, g, h, A, 4, b[44]), h = l(h, f, m, g, u, 11, b[45]), g = l(g, h, f, m, x, 16, b[46]), m = l(m, g, h, f, j, 23, b[47]), f = s(f, m, g, h, c, 6, b[48]), h = s(h, f, m, g, w, 10, b[49]), g = s(g, h, f, m, E, 15, b[50]), m = s(m, g, h, f, r, 21, b[51]), f = s(f, m, g, h, u, 6, b[52]), h = s(h, f, m, g, k, 10, b[53]), g = s(g, h, f, m, B, 15, b[54]), m = s(m, g, h, f, e, 21, b[55]), f = s(f, m, g, h, v, 6, b[56]), h = s(h, f, m, g, x, 10, b[57]), g = s(g, h, f, m, t, 15, b[58]), m = s(m, g, h, f, D, 21, b[59]), f = s(f, m, g, h, z, 6, b[60]), h = s(h, f, m, g, C, 10, b[61]), g = s(g, h, f, m, j, 15, b[62]), m = s(m, g, h, f, A, 21, b[63]);

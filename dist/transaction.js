@@ -1,70 +1,72 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Transaction = void 0;
-const utils_1 = require("./utils");
-const appendix_1 = require("./appendix");
-const converters_1 = require("./converters");
-const crypto_1 = require("./crypto");
-class Transaction {
-    constructor(heatsdk, recipientOrRecipientPublicKey, builder) {
+var utils_1 = require("./utils");
+var appendix_1 = require("./appendix");
+var converters_1 = require("./converters");
+var crypto_1 = require("./crypto");
+var Transaction = /** @class */ (function () {
+    function Transaction(heatsdk, recipientOrRecipientPublicKey, builder) {
         this.heatsdk = heatsdk;
         this.recipientOrRecipientPublicKey = recipientOrRecipientPublicKey;
         this.builder = builder;
     }
-    sign(secretPhrase) {
-        return this.build(secretPhrase).then(() => {
-            this.transaction_ = this.builder.build(secretPhrase);
-            return this;
+    Transaction.prototype.sign = function (secretPhrase) {
+        var _this = this;
+        return this.build(secretPhrase).then(function () {
+            _this.transaction_ = _this.builder.build(secretPhrase);
+            return _this;
         });
-    }
+    };
     /**
      * Return signed transaction
      */
-    getTransaction() {
+    Transaction.prototype.getTransaction = function () {
         if (!utils_1.isDefined(this.transaction_))
             throw new Error("Must call sign() first");
         return this.transaction_;
-    }
-    build(secretPhrase) {
-        return new Promise((resolve, reject) => {
-            this.builder
-                .deadline(utils_1.isDefined(this.deadline_) ? this.deadline_ : 1440)
+    };
+    Transaction.prototype.build = function (secretPhrase) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.builder
+                .deadline(utils_1.isDefined(_this.deadline_) ? _this.deadline_ : 1440)
                 .timestamp(utils_1.epochTime())
                 .ecBlockHeight(1)
                 .ecBlockId("0");
-            let recipientPublicKeyHex;
-            if (utils_1.isDefined(this.privateMessageToSelf_))
+            var recipientPublicKeyHex;
+            if (utils_1.isDefined(_this.privateMessageToSelf_))
                 recipientPublicKeyHex = crypto_1.secretPhraseToPublicKey(secretPhrase);
             if (!recipientPublicKeyHex)
-                recipientPublicKeyHex = utils_1.isPublicKey(this.recipientOrRecipientPublicKey)
-                    ? this.recipientOrRecipientPublicKey
+                recipientPublicKeyHex = utils_1.isPublicKey(_this.recipientOrRecipientPublicKey)
+                    ? _this.recipientOrRecipientPublicKey
                     : null;
             if (recipientPublicKeyHex) {
-                this.builder
+                _this.builder
                     .publicKeyAnnouncement(new appendix_1.AppendixPublicKeyAnnouncement().init(converters_1.hexStringToByteArray(recipientPublicKeyHex)))
                     .recipientId(crypto_1.getAccountIdFromPublicKey(recipientPublicKeyHex));
             }
             else {
-                this.builder.recipientId(this.recipientOrRecipientPublicKey);
+                _this.builder.recipientId(_this.recipientOrRecipientPublicKey);
             }
-            if (utils_1.isDefined(this.publicMessage_)) {
-                let a = new appendix_1.AppendixMessage().init(this.messageIsBinary_
-                    ? converters_1.hexStringToByteArray(this.publicMessage_)
-                    : converters_1.stringToByteArray(this.publicMessage_), !this.messageIsBinary_);
-                this.builder.message(a);
+            if (utils_1.isDefined(_this.publicMessage_)) {
+                var a = new appendix_1.AppendixMessage().init(_this.messageIsBinary_
+                    ? converters_1.hexStringToByteArray(_this.publicMessage_)
+                    : converters_1.stringToByteArray(_this.publicMessage_), !_this.messageIsBinary_);
+                _this.builder.message(a);
             }
             else {
-                let isPrivate = utils_1.isDefined(this.privateMessage_);
-                let isPrivateToSelf = utils_1.isDefined(this.privateMessageToSelf_);
-                if (isPrivate || isPrivateToSelf) {
+                var isPrivate_1 = utils_1.isDefined(_this.privateMessage_);
+                var isPrivateToSelf = utils_1.isDefined(_this.privateMessageToSelf_);
+                if (isPrivate_1 || isPrivateToSelf) {
                     if (!recipientPublicKeyHex)
                         throw new Error("Recipient public key not provided");
-                    crypto_1.encryptMessage(isPrivate ? this.privateMessage_ : this.privateMessageToSelf_, recipientPublicKeyHex, secretPhrase)
-                        .then(encryptedMessage => {
-                        let a = (isPrivate
+                    crypto_1.encryptMessage(isPrivate_1 ? _this.privateMessage_ : _this.privateMessageToSelf_, recipientPublicKeyHex, secretPhrase)
+                        .then(function (encryptedMessage) {
+                        var a = (isPrivate_1
                             ? new appendix_1.AppendixEncryptedMessage()
-                            : new appendix_1.AppendixEncryptToSelfMessage()).init(encryptedMessage, !this.messageIsBinary_);
-                        this.builder.encryptToSelfMessage(a);
+                            : new appendix_1.AppendixEncryptToSelfMessage()).init(encryptedMessage, !_this.messageIsBinary_);
+                        _this.builder.encryptToSelfMessage(a);
                         resolve(); // resolve in encryptMessage callback
                     })
                         .catch(reject);
@@ -73,36 +75,37 @@ class Transaction {
             }
             resolve();
         });
-    }
-    hasMessage() {
+    };
+    Transaction.prototype.hasMessage = function () {
         return (utils_1.isDefined(this.publicMessage_) ||
             utils_1.isDefined(this.privateMessage_) ||
             utils_1.isDefined(this.privateMessageToSelf_));
-    }
-    publicMessage(message, isBinary) {
+    };
+    Transaction.prototype.publicMessage = function (message, isBinary) {
         if (this.hasMessage())
             throw new Error("Transaction already has a message");
         this.messageIsBinary_ = !!isBinary;
         this.publicMessage_ = message;
         return this;
-    }
-    privateMessage(message, isBinary) {
+    };
+    Transaction.prototype.privateMessage = function (message, isBinary) {
         if (this.hasMessage())
             throw new Error("Transaction already has a message");
         this.messageIsBinary_ = !!isBinary;
         this.privateMessage_ = message;
         return this;
-    }
-    privateMessageToSelf(message, isBinary) {
+    };
+    Transaction.prototype.privateMessageToSelf = function (message, isBinary) {
         if (this.hasMessage())
             throw new Error("Transaction already has a message");
         this.messageIsBinary_ = !!isBinary;
         this.privateMessageToSelf_ = message;
         return this;
-    }
-    deadline(deadline) {
+    };
+    Transaction.prototype.deadline = function (deadline) {
         this.deadline_ = deadline;
         return this;
-    }
-}
+    };
+    return Transaction;
+}());
 exports.Transaction = Transaction;

@@ -1,4 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -26,113 +39,123 @@ exports.AppendixPublicNameAssignment = exports.AppendixPublicNameAnnouncement = 
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-const converters_1 = require("./converters");
-const utils_1 = require("./utils");
-const long_1 = __importDefault(require("long"));
-const fee_1 = require("./fee");
-const constants_1 = require("./constants");
-const crypto_1 = require("./crypto");
-class AbstractAppendix {
-    constructor(buffer) {
+var converters_1 = require("./converters");
+var utils_1 = require("./utils");
+var long_1 = __importDefault(require("long"));
+var fee_1 = require("./fee");
+var constants_1 = require("./constants");
+var crypto_1 = require("./crypto");
+var AbstractAppendix = /** @class */ (function () {
+    function AbstractAppendix(buffer) {
         this.version = 1;
         if (buffer)
             this.parse(buffer);
     }
-    getSize() {
+    AbstractAppendix.prototype.getSize = function () {
         return this.getMySize() + 1;
-    }
-    putBytes(buffer) {
+    };
+    AbstractAppendix.prototype.putBytes = function (buffer) {
         buffer.writeByte(this.version);
         this.putMyBytes(buffer);
-    }
-    parse(buffer) {
+    };
+    AbstractAppendix.prototype.parse = function (buffer) {
         this.version = buffer.readByte();
         return this;
-    }
-    parseJSON(json) {
+    };
+    AbstractAppendix.prototype.parseJSON = function (json) {
         this.version = json["version." + this.getAppendixName()];
         return this;
-    }
-    getJSONObject() {
-        let json = {};
+    };
+    AbstractAppendix.prototype.getJSONObject = function () {
+        var json = {};
         json["version." + this.getAppendixName()] = this.version;
         this.putMyJSON(json);
         return json;
-    }
-    getVersion() {
+    };
+    AbstractAppendix.prototype.getVersion = function () {
         return this.version;
-    }
-}
+    };
+    return AbstractAppendix;
+}());
 exports.AbstractAppendix = AbstractAppendix;
-class AppendixMessage extends AbstractAppendix {
-    init(message, isText) {
+var AppendixMessage = /** @class */ (function (_super) {
+    __extends(AppendixMessage, _super);
+    function AppendixMessage() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AppendixMessage.prototype.init = function (message, isText) {
         this.message = message;
         this.isText = isText;
         return this;
-    }
-    getFee() {
+    };
+    AppendixMessage.prototype.getFee = function () {
         return fee_1.Fee.MESSAGE_APPENDIX_FEE;
-    }
-    getAppendixName() {
+    };
+    AppendixMessage.prototype.getAppendixName = function () {
         return "Message";
-    }
-    getMySize() {
+    };
+    AppendixMessage.prototype.getMySize = function () {
         return 4 + this.message.length;
-    }
-    parse(buffer) {
-        super.parse(buffer);
-        let messageLength = buffer.readInt();
+    };
+    AppendixMessage.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
+        var messageLength = buffer.readInt();
         this.isText = messageLength < 0;
         if (messageLength < 0)
             messageLength &= constants_1.MAX_INT32;
         this.message = [];
-        for (let i = 0; i < messageLength; i++)
+        for (var i = 0; i < messageLength; i++)
             this.message.push(buffer.readByte());
         return this;
-    }
-    putMyBytes(buffer) {
+    };
+    AppendixMessage.prototype.putMyBytes = function (buffer) {
         buffer.writeInt(this.isText ? this.message.length | constants_1.MIN_INT32 : this.message.length);
-        this.message.forEach(byte => {
+        this.message.forEach(function (byte) {
             buffer.writeByte(byte);
         });
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    AppendixMessage.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.isText = json["messageIsText"];
         this.message = this.isText
             ? converters_1.stringToByteArray(json["message"])
             : converters_1.hexStringToByteArray(json["message"]);
         return this;
-    }
-    putMyJSON(json) {
+    };
+    AppendixMessage.prototype.putMyJSON = function (json) {
         json["message"] = this.isText
             ? converters_1.byteArrayToString(this.message)
             : converters_1.byteArrayToHexString(this.message);
         json["messageIsText"] = this.isText;
-    }
-    getMessage() {
+    };
+    AppendixMessage.prototype.getMessage = function () {
         return this.message;
-    }
-    getIsText() {
+    };
+    AppendixMessage.prototype.getIsText = function () {
         return this.isText;
-    }
-}
+    };
+    return AppendixMessage;
+}(AbstractAppendix));
 exports.AppendixMessage = AppendixMessage;
-class AbstractAppendixEncryptedMessage extends AbstractAppendix {
-    init(message, isText) {
+var AbstractAppendixEncryptedMessage = /** @class */ (function (_super) {
+    __extends(AbstractAppendixEncryptedMessage, _super);
+    function AbstractAppendixEncryptedMessage() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AbstractAppendixEncryptedMessage.prototype.init = function (message, isText) {
         this.encryptedMessage = message;
         this.isText_ = isText;
         return this;
-    }
-    getFee() {
+    };
+    AbstractAppendixEncryptedMessage.prototype.getFee = function () {
         return fee_1.Fee.ENCRYPTED_MESSAGE_APPENDIX_FEE;
-    }
-    getMySize() {
+    };
+    AbstractAppendixEncryptedMessage.prototype.getMySize = function () {
         return 4 + this.encryptedMessage.data.length + this.encryptedMessage.nonce.length;
-    }
-    parse(buffer) {
-        super.parse(buffer);
-        let length = buffer.readInt32();
+    };
+    AbstractAppendixEncryptedMessage.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
+        var length = buffer.readInt32();
         this.isText_ = length < 0;
         if (length < 0)
             length &= constants_1.MAX_INT32;
@@ -146,11 +169,11 @@ class AbstractAppendixEncryptedMessage extends AbstractAppendix {
         }
         if (length > constants_1.MAX_ENCRYPTED_MESSAGE_LENGTH)
             throw new Error("Max encrypted data length exceeded: " + length);
-        let messageBytes = new Array(length);
-        for (let i = 0; i < length; i++)
+        var messageBytes = new Array(length);
+        for (var i = 0; i < length; i++)
             messageBytes[i] = buffer.readByte();
-        let nonceBytes = new Array(32);
-        for (let i = 0; i < 32; i++)
+        var nonceBytes = new Array(32);
+        for (var i = 0; i < 32; i++)
             nonceBytes[i] = buffer.readByte();
         this.encryptedMessage = {
             isText: this.isText_,
@@ -158,20 +181,20 @@ class AbstractAppendixEncryptedMessage extends AbstractAppendix {
             nonce: converters_1.byteArrayToHexString(nonceBytes)
         };
         return this;
-    }
-    putMyBytes(buffer) {
-        let messageBytes = converters_1.hexStringToByteArray(this.encryptedMessage.data);
-        let length = messageBytes.length;
+    };
+    AbstractAppendixEncryptedMessage.prototype.putMyBytes = function (buffer) {
+        var messageBytes = converters_1.hexStringToByteArray(this.encryptedMessage.data);
+        var length = messageBytes.length;
         buffer.writeInt32(this.isText_ ? length | constants_1.MIN_INT32 : length);
-        messageBytes.forEach(byte => {
+        messageBytes.forEach(function (byte) {
             buffer.writeByte(byte);
         });
-        converters_1.hexStringToByteArray(this.encryptedMessage.nonce).forEach(byte => {
+        converters_1.hexStringToByteArray(this.encryptedMessage.nonce).forEach(function (byte) {
             buffer.writeByte(byte);
         });
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    AbstractAppendixEncryptedMessage.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.isText_ = json["isText"];
         this.encryptedMessage = {
             isText: this.isText_,
@@ -179,187 +202,223 @@ class AbstractAppendixEncryptedMessage extends AbstractAppendix {
             nonce: json["nonce"]
         };
         return this;
-    }
-    putMyJSON(json) {
+    };
+    AbstractAppendixEncryptedMessage.prototype.putMyJSON = function (json) {
         json["data"] = this.encryptedMessage.data;
         json["nonce"] = this.encryptedMessage.nonce;
         json["isText"] = this.isText;
-    }
-    isText() {
+    };
+    AbstractAppendixEncryptedMessage.prototype.isText = function () {
         return this.isText_;
-    }
-}
+    };
+    return AbstractAppendixEncryptedMessage;
+}(AbstractAppendix));
 exports.AbstractAppendixEncryptedMessage = AbstractAppendixEncryptedMessage;
-class AppendixEncryptedMessage extends AbstractAppendixEncryptedMessage {
-    getAppendixName() {
+var AppendixEncryptedMessage = /** @class */ (function (_super) {
+    __extends(AppendixEncryptedMessage, _super);
+    function AppendixEncryptedMessage() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AppendixEncryptedMessage.prototype.getAppendixName = function () {
         return "EncryptedMessage";
-    }
-    parseJSON(json) {
-        super.parseJSON(json["encryptedMessage"]);
+    };
+    AppendixEncryptedMessage.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json["encryptedMessage"]);
         return this;
-    }
-    putMyJSON(json) {
-        super.putMyJSON(json);
+    };
+    AppendixEncryptedMessage.prototype.putMyJSON = function (json) {
+        _super.prototype.putMyJSON.call(this, json);
         json["encryptedMessage"] = json;
-    }
-}
+    };
+    return AppendixEncryptedMessage;
+}(AbstractAppendixEncryptedMessage));
 exports.AppendixEncryptedMessage = AppendixEncryptedMessage;
-class AppendixEncryptToSelfMessage extends AbstractAppendixEncryptedMessage {
-    getAppendixName() {
+var AppendixEncryptToSelfMessage = /** @class */ (function (_super) {
+    __extends(AppendixEncryptToSelfMessage, _super);
+    function AppendixEncryptToSelfMessage() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AppendixEncryptToSelfMessage.prototype.getAppendixName = function () {
         return "EncryptToSelfMessage";
-    }
-    parseJSON(json) {
-        super.parseJSON(json["encryptToSelfMessage"]);
+    };
+    AppendixEncryptToSelfMessage.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json["encryptToSelfMessage"]);
         return this;
-    }
-    putMyJSON(json) {
-        super.putMyJSON(json);
+    };
+    AppendixEncryptToSelfMessage.prototype.putMyJSON = function (json) {
+        _super.prototype.putMyJSON.call(this, json);
         json["encryptToSelfMessage"] = json;
-    }
-}
+    };
+    return AppendixEncryptToSelfMessage;
+}(AbstractAppendixEncryptedMessage));
 exports.AppendixEncryptToSelfMessage = AppendixEncryptToSelfMessage;
-class AppendixPublicKeyAnnouncement extends AbstractAppendix {
-    init(publicKey) {
+var AppendixPublicKeyAnnouncement = /** @class */ (function (_super) {
+    __extends(AppendixPublicKeyAnnouncement, _super);
+    function AppendixPublicKeyAnnouncement() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AppendixPublicKeyAnnouncement.prototype.init = function (publicKey) {
         this.publicKey = publicKey;
         return this;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    AppendixPublicKeyAnnouncement.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.publicKey = utils_1.readBytes(buffer, 32);
         return this;
-    }
-    getFee() {
+    };
+    AppendixPublicKeyAnnouncement.prototype.getFee = function () {
         return fee_1.Fee.PUBLICKEY_ANNOUNCEMENT_APPENDIX_FEE;
-    }
-    getAppendixName() {
+    };
+    AppendixPublicKeyAnnouncement.prototype.getAppendixName = function () {
         return "PublicKeyAnnouncement";
-    }
-    getMySize() {
+    };
+    AppendixPublicKeyAnnouncement.prototype.getMySize = function () {
         return 32;
-    }
-    putMyBytes(buffer) {
+    };
+    AppendixPublicKeyAnnouncement.prototype.putMyBytes = function (buffer) {
         utils_1.writeBytes(buffer, this.publicKey);
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    AppendixPublicKeyAnnouncement.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.publicKey = converters_1.hexStringToByteArray(json["recipientPublicKey"]);
         return this;
-    }
-    putMyJSON(json) {
+    };
+    AppendixPublicKeyAnnouncement.prototype.putMyJSON = function (json) {
         json["recipientPublicKey"] = converters_1.byteArrayToHexString(this.publicKey);
-    }
-}
+    };
+    return AppendixPublicKeyAnnouncement;
+}(AbstractAppendix));
 exports.AppendixPublicKeyAnnouncement = AppendixPublicKeyAnnouncement;
-class AppendixPrivateNameAnnouncement extends AbstractAppendix {
-    getFee() {
+var AppendixPrivateNameAnnouncement = /** @class */ (function (_super) {
+    __extends(AppendixPrivateNameAnnouncement, _super);
+    function AppendixPrivateNameAnnouncement() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AppendixPrivateNameAnnouncement.prototype.getFee = function () {
         return fee_1.Fee.PRIVATE_NAME_ANNOUNCEMENT_APPENDIX_FEE;
-    }
-    getAppendixName() {
+    };
+    AppendixPrivateNameAnnouncement.prototype.getAppendixName = function () {
         return "PrivateNameAnnouncement";
-    }
-    getMySize() {
+    };
+    AppendixPrivateNameAnnouncement.prototype.getMySize = function () {
         return 8;
-    }
-    putMyBytes(buffer) { }
-    putMyJSON(json) { }
-    getName() {
+    };
+    AppendixPrivateNameAnnouncement.prototype.putMyBytes = function (buffer) { };
+    AppendixPrivateNameAnnouncement.prototype.putMyJSON = function (json) { };
+    AppendixPrivateNameAnnouncement.prototype.getName = function () {
         return this.privateNameAnnouncement;
-    }
-}
+    };
+    return AppendixPrivateNameAnnouncement;
+}(AbstractAppendix));
 exports.AppendixPrivateNameAnnouncement = AppendixPrivateNameAnnouncement;
-class AppendixPrivateNameAssignment extends AbstractAppendix {
-    getFee() {
+var AppendixPrivateNameAssignment = /** @class */ (function (_super) {
+    __extends(AppendixPrivateNameAssignment, _super);
+    function AppendixPrivateNameAssignment() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AppendixPrivateNameAssignment.prototype.getFee = function () {
         return fee_1.Fee.PRIVATE_NAME_ASSIGNEMENT_APPENDIX_FEE;
-    }
-    getAppendixName() {
+    };
+    AppendixPrivateNameAssignment.prototype.getAppendixName = function () {
         return "PrivateNameAssignment";
-    }
-    getMySize() {
+    };
+    AppendixPrivateNameAssignment.prototype.getMySize = function () {
         return 8 + 64;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    AppendixPrivateNameAssignment.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.privateNameAssignment = buffer.readInt64();
         this.signature = utils_1.readBytes(buffer, 64);
         return this;
-    }
-    putMyBytes(buffer) {
+    };
+    AppendixPrivateNameAssignment.prototype.putMyBytes = function (buffer) {
         buffer.writeInt64(this.privateNameAssignment);
         utils_1.writeBytes(buffer, this.signature);
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    AppendixPrivateNameAssignment.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.privateNameAssignment = long_1.default.fromString(json["privateNameAssignment"], true);
         this.signature = converters_1.hexStringToByteArray(json["signature"]);
         return this;
-    }
-    putMyJSON(json) {
+    };
+    AppendixPrivateNameAssignment.prototype.putMyJSON = function (json) {
         json["privateNameAssignment"] = this.privateNameAssignment.toUnsigned().toString();
         json["signature"] = converters_1.byteArrayToHexString(this.signature);
-    }
-    getName() {
+    };
+    AppendixPrivateNameAssignment.prototype.getName = function () {
         return this.privateNameAssignment;
-    }
-}
+    };
+    return AppendixPrivateNameAssignment;
+}(AbstractAppendix));
 exports.AppendixPrivateNameAssignment = AppendixPrivateNameAssignment;
-class AppendixPublicNameAnnouncement extends AbstractAppendix {
-    getFee() {
+var AppendixPublicNameAnnouncement = /** @class */ (function (_super) {
+    __extends(AppendixPublicNameAnnouncement, _super);
+    function AppendixPublicNameAnnouncement() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AppendixPublicNameAnnouncement.prototype.getFee = function () {
         return fee_1.Fee.PUBLIC_NAME_ANNOUNCEMENT_APPENDIX_FEE;
-    }
-    getAppendixName() {
+    };
+    AppendixPublicNameAnnouncement.prototype.getAppendixName = function () {
         return "PublicNameAnnouncement";
-    }
-    getMySize() {
+    };
+    AppendixPublicNameAnnouncement.prototype.getMySize = function () {
         return 1 + this.publicNameAnnouncement.length;
-    }
-    putMyBytes(buffer) { }
-    putMyJSON(json) { }
-    getFullName() {
+    };
+    AppendixPublicNameAnnouncement.prototype.putMyBytes = function (buffer) { };
+    AppendixPublicNameAnnouncement.prototype.putMyJSON = function (json) { };
+    AppendixPublicNameAnnouncement.prototype.getFullName = function () {
         return this.publicNameAnnouncement;
-    }
-    getNameHash() {
+    };
+    AppendixPublicNameAnnouncement.prototype.getNameHash = function () {
         return this.nameHash;
-    }
-}
+    };
+    return AppendixPublicNameAnnouncement;
+}(AbstractAppendix));
 exports.AppendixPublicNameAnnouncement = AppendixPublicNameAnnouncement;
-class AppendixPublicNameAssignment extends AbstractAppendix {
-    getFee() {
+var AppendixPublicNameAssignment = /** @class */ (function (_super) {
+    __extends(AppendixPublicNameAssignment, _super);
+    function AppendixPublicNameAssignment() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AppendixPublicNameAssignment.prototype.getFee = function () {
         return fee_1.Fee.PUBLIC_NAME_ASSIGNEMENT_APPENDIX_FEE;
-    }
-    getAppendixName() {
+    };
+    AppendixPublicNameAssignment.prototype.getAppendixName = function () {
         return "PublicAccountNameAssignment";
-    }
-    getMySize() {
+    };
+    AppendixPublicNameAssignment.prototype.getMySize = function () {
         return 1 + this.publicNameAssignment.length + 64;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    AppendixPublicNameAssignment.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.publicNameAssignment = utils_1.readBytes(buffer, buffer.readByte());
         this.signature = utils_1.readBytes(buffer, 64);
         this.nameHash = crypto_1.fullNameToLong(this.publicNameAssignment);
         return this;
-    }
-    putMyBytes(buffer) {
+    };
+    AppendixPublicNameAssignment.prototype.putMyBytes = function (buffer) {
         buffer.writeByte(this.publicNameAssignment.length);
         utils_1.writeBytes(buffer, this.publicNameAssignment);
         utils_1.writeBytes(buffer, this.signature);
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    AppendixPublicNameAssignment.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.publicNameAssignment = converters_1.hexStringToByteArray(json["publicNameAssignment"]);
         this.signature = converters_1.hexStringToByteArray(json["signature"]);
         this.nameHash = crypto_1.fullNameToLong(this.publicNameAssignment);
         return this;
-    }
-    putMyJSON(json) {
+    };
+    AppendixPublicNameAssignment.prototype.putMyJSON = function (json) {
         json["publicNameAssignment"] = converters_1.byteArrayToHexString(this.publicNameAssignment);
         json["signature"] = converters_1.byteArrayToHexString(this.signature);
-    }
-    getFullName() {
+    };
+    AppendixPublicNameAssignment.prototype.getFullName = function () {
         return this.publicNameAssignment;
-    }
-    getNameHash() {
+    };
+    AppendixPublicNameAssignment.prototype.getNameHash = function () {
         return this.nameHash;
-    }
-}
+    };
+    return AppendixPublicNameAssignment;
+}(AbstractAppendix));
 exports.AppendixPublicNameAssignment = AppendixPublicNameAssignment;

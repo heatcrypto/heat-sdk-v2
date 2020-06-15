@@ -26,8 +26,8 @@ exports.writeBytes = exports.readBytes = exports.isEmpty = exports.extend = expo
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-const big_js_1 = __importDefault(require("big.js"));
-const converters_1 = require("./converters");
+var big_js_1 = __importDefault(require("big.js"));
+var converters_1 = require("./converters");
 function isPublicKey(publicKeyHex) {
     // if (parseInt(publicKeyHex, 16).toString(16) === publicKeyHex.toLowerCase()) {
     //   return converters.hexStringToByteArray(publicKeyHex).length == 32
@@ -47,18 +47,18 @@ function commaFormat(amount) {
     if (typeof amount == "undefined") {
         return "0";
     }
-    let neg = amount.indexOf("-") == 0;
+    var neg = amount.indexOf("-") == 0;
     if (neg) {
         amount = amount.substr(1);
     }
-    let dec = amount.split("."); // input is result of convertNQT
-    let parts = dec[0]
+    var dec = amount.split("."); // input is result of convertNQT
+    var parts = dec[0]
         .split("")
         .reverse()
         .join("")
         .split(/(\d{3})/)
         .reverse();
-    let format = [];
+    var format = [];
     for (var i = 0; i < parts.length; i++) {
         if (parts[i]) {
             format.push(parts[i]
@@ -179,13 +179,14 @@ function calculateTotalOrderPriceQNT(quantityQNT, priceQNT) {
         .toString();
 }
 exports.calculateTotalOrderPriceQNT = calculateTotalOrderPriceQNT;
-class ConvertToQNTError {
-    constructor(message, code) {
+var ConvertToQNTError = /** @class */ (function () {
+    function ConvertToQNTError(message, code) {
         this.message = message;
         this.code = code;
         this.name = "ConvertToQNTError";
     }
-}
+    return ConvertToQNTError;
+}());
 /**
  * Converts a float to a QNT based on the number of decimals to use.
  * Note! That this method throws a ConvertToQNTError in case the
@@ -247,7 +248,7 @@ function getByteLen(value) {
 }
 exports.getByteLen = getByteLen;
 function repeatWhile(delay, cb) {
-    var fn = () => {
+    var fn = function () {
         if (cb()) {
             clearInterval(interval);
         }
@@ -294,14 +295,14 @@ exports.isEmpty = isEmpty;
 function readBytes(buffer, length, offset) {
     if (offset)
         buffer.offset = offset;
-    let array = [];
-    for (let i = 0; i < length; i++)
+    var array = [];
+    for (var i = 0; i < length; i++)
         array.push(buffer.readByte());
     return array;
 }
 exports.readBytes = readBytes;
 function writeBytes(buffer, bytes) {
-    for (let i = 0; i < bytes.length; i++)
+    for (var i = 0; i < bytes.length; i++)
         buffer.writeByte(bytes[i]);
 }
 exports.writeBytes = writeBytes;

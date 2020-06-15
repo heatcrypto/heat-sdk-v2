@@ -26,7 +26,10 @@ exports.HeatConstants = exports.MAX_ENCRYPTED_MESSAGE_LENGTH = exports.MAX_INT32
 exports.MIN_INT32 = 0x80000000;
 exports.MAX_INT32 = 0x7fffffff;
 exports.MAX_ENCRYPTED_MESSAGE_LENGTH = 1000;
-class HeatConstants {
-}
+var HeatConstants = /** @class */ (function () {
+    function HeatConstants() {
+    }
+    HeatConstants.ONE_HEAT = 100000000;
+    return HeatConstants;
+}());
 exports.HeatConstants = HeatConstants;
-HeatConstants.ONE_HEAT = 100000000;

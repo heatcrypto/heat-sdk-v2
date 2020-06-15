@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.int32ToBytes = exports.shortArrayToHexString = exports.shortArrayToByteArray = exports.byteArrayToShortArray = exports.byteArrayToString = exports.wordArrayToByteArray = exports.byteArrayToWordArray = exports.byteArrayToBigInteger = exports.byteArrayToSignedInt32 = exports.byteArrayToSignedShort = exports.hexStringToString = exports.stringToHexString = exports.hexStringToByteArray = exports.stringToByteArray = exports.byteArrayToHexString = void 0;
-const big_js_1 = __importDefault(require("big.js"));
+var big_js_1 = __importDefault(require("big.js"));
 var charToNibble = {};
 var nibbleToChar = [];
 var i;

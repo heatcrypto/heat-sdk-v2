@@ -1,4 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -26,78 +39,95 @@ exports.ARBITRARY_MESSAGE = exports.ORDINARY_PAYMENT = exports.AccountControlEff
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-const appendix_1 = require("./appendix");
-const transaction_type_1 = require("./transaction-type");
-const converters_1 = require("./converters");
-const utils_1 = require("./utils");
-const fee_1 = require("./fee");
-const long_1 = __importDefault(require("long"));
-class EmptyAttachment extends appendix_1.AbstractAppendix {
-    constructor() {
-        super();
-        this.version = 0;
+var appendix_1 = require("./appendix");
+var transaction_type_1 = require("./transaction-type");
+var converters_1 = require("./converters");
+var utils_1 = require("./utils");
+var fee_1 = require("./fee");
+var long_1 = __importDefault(require("long"));
+var EmptyAttachment = /** @class */ (function (_super) {
+    __extends(EmptyAttachment, _super);
+    function EmptyAttachment() {
+        var _this = _super.call(this) || this;
+        _this.version = 0;
+        return _this;
     }
-    parse(buffer) {
+    EmptyAttachment.prototype.parse = function (buffer) {
         return this;
-    }
-    getSize() {
+    };
+    EmptyAttachment.prototype.getSize = function () {
         return this.getMySize();
-    }
-    putMyBytes(buffer) { }
-    putMyJSON(json) { }
-    getMySize() {
+    };
+    EmptyAttachment.prototype.putMyBytes = function (buffer) { };
+    EmptyAttachment.prototype.putMyJSON = function (json) { };
+    EmptyAttachment.prototype.getMySize = function () {
         return 0;
-    }
-}
+    };
+    return EmptyAttachment;
+}(appendix_1.AbstractAppendix));
 exports.EmptyAttachment = EmptyAttachment;
-class Payment extends EmptyAttachment {
-    getFee() {
-        return fee_1.Fee.DEFAULT;
+var Payment = /** @class */ (function (_super) {
+    __extends(Payment, _super);
+    function Payment() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    getAppendixName() {
+    Payment.prototype.getFee = function () {
+        return fee_1.Fee.DEFAULT;
+    };
+    Payment.prototype.getAppendixName = function () {
         return "OrdinaryPayment";
-    }
-    getTransactionType() {
+    };
+    Payment.prototype.getTransactionType = function () {
         return transaction_type_1.ORDINARY_PAYMENT_TRANSACTION_TYPE;
-    }
-}
+    };
+    return Payment;
+}(EmptyAttachment));
 exports.Payment = Payment;
-class Message extends EmptyAttachment {
-    getFee() {
+var Message = /** @class */ (function (_super) {
+    __extends(Message, _super);
+    function Message() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Message.prototype.getFee = function () {
         return fee_1.Fee.DEFAULT;
-    }
-    getAppendixName() {
+    };
+    Message.prototype.getAppendixName = function () {
         return "ArbitraryMessage";
-    }
-    getTransactionType() {
+    };
+    Message.prototype.getTransactionType = function () {
         return transaction_type_1.ARBITRARY_MESSAGE_TRANSACTION_TYPE;
-    }
-}
+    };
+    return Message;
+}(EmptyAttachment));
 exports.Message = Message;
 // ------------------- Asset ------------------------------------------------------------------------------------------
-class AssetIssuance extends appendix_1.AbstractAppendix {
-    init(descriptionUrl, descriptionHash, quantity, decimals, dillutable) {
+var AssetIssuance = /** @class */ (function (_super) {
+    __extends(AssetIssuance, _super);
+    function AssetIssuance() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AssetIssuance.prototype.init = function (descriptionUrl, descriptionHash, quantity, decimals, dillutable) {
         this.descriptionUrl = descriptionUrl;
         this.descriptionHash = descriptionHash == null ? new Array(32).fill(0) : descriptionHash;
         this.quantity = long_1.default.fromString(quantity);
         this.decimals = decimals;
         this.dillutable = dillutable;
         return this;
-    }
-    getMySize() {
+    };
+    AssetIssuance.prototype.getMySize = function () {
         return 1 + converters_1.stringToByteArray(this.descriptionUrl).length + 32 + 8 + 1 + 1;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    AssetIssuance.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.descriptionUrl = converters_1.byteArrayToString(utils_1.readBytes(buffer, buffer.readByte())); //need to check Constants.MAX_ASSET_DESCRIPTION_URL_LENGTH ?
         this.descriptionHash = utils_1.readBytes(buffer, 32);
         this.quantity = buffer.readInt64();
         this.decimals = buffer.readByte();
         this.dillutable = buffer.readByte() == 1;
         return this;
-    }
-    putMyBytes(buffer) {
-        let descriptionUrl = converters_1.stringToByteArray(this.descriptionUrl);
+    };
+    AssetIssuance.prototype.putMyBytes = function (buffer) {
+        var descriptionUrl = converters_1.stringToByteArray(this.descriptionUrl);
         buffer.writeByte(descriptionUrl.length);
         utils_1.writeBytes(buffer, descriptionUrl);
         if (this.descriptionHash && this.descriptionHash.length != 32)
@@ -106,144 +136,168 @@ class AssetIssuance extends appendix_1.AbstractAppendix {
         buffer.writeInt64(this.quantity);
         buffer.writeByte(this.decimals);
         buffer.writeByte(this.dillutable ? 1 : 0);
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    AssetIssuance.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.descriptionUrl = json["descriptionUrl"];
         this.descriptionHash = converters_1.hexStringToByteArray(json["descriptionHash"]);
         this.quantity = long_1.default.fromString(json["quantity"]);
         this.decimals = json["decimals"];
         this.dillutable = json["dillutable"];
         return this;
-    }
-    putMyJSON(json) {
+    };
+    AssetIssuance.prototype.putMyJSON = function (json) {
         json["descriptionUrl"] = this.descriptionUrl;
         json["descriptionHash"] = converters_1.byteArrayToHexString(Array.from(this.descriptionHash));
         json["quantity"] = this.quantity.toString();
         json["decimals"] = this.decimals;
         json["dillutable"] = this.dillutable;
-    }
-    getFee() {
+    };
+    AssetIssuance.prototype.getFee = function () {
         return fee_1.Fee.ASSET_ISSUANCE_FEE;
-    }
-    getAppendixName() {
+    };
+    AssetIssuance.prototype.getAppendixName = function () {
         return "AssetIssuance";
-    }
-    getTransactionType() {
+    };
+    AssetIssuance.prototype.getTransactionType = function () {
         return transaction_type_1.COLORED_COINS_ASSET_ISSUANCE_TRANSACTION_TYPE;
-    }
-    getDescriptionUrl() {
+    };
+    AssetIssuance.prototype.getDescriptionUrl = function () {
         return this.descriptionUrl;
-    }
-    getDescriptionHash() {
+    };
+    AssetIssuance.prototype.getDescriptionHash = function () {
         return this.descriptionHash;
-    }
-    getQuantity() {
+    };
+    AssetIssuance.prototype.getQuantity = function () {
         return this.quantity;
-    }
-    getDecimals() {
+    };
+    AssetIssuance.prototype.getDecimals = function () {
         return this.decimals;
-    }
-    getDillutable() {
+    };
+    AssetIssuance.prototype.getDillutable = function () {
         return this.dillutable;
-    }
-}
+    };
+    return AssetIssuance;
+}(appendix_1.AbstractAppendix));
 exports.AssetIssuance = AssetIssuance;
-class AssetBase extends appendix_1.AbstractAppendix {
-    init(assetId, quantity) {
+var AssetBase = /** @class */ (function (_super) {
+    __extends(AssetBase, _super);
+    function AssetBase() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AssetBase.prototype.init = function (assetId, quantity) {
         this.assetId = long_1.default.fromString(assetId);
         this.quantity = long_1.default.fromString(quantity);
         return this;
-    }
-    getMySize() {
+    };
+    AssetBase.prototype.getMySize = function () {
         return 8 + 8;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    AssetBase.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.assetId = buffer.readInt64();
         this.quantity = buffer.readInt64();
         return this;
-    }
-    putMyBytes(buffer) {
+    };
+    AssetBase.prototype.putMyBytes = function (buffer) {
         buffer.writeInt64(this.assetId);
         buffer.writeInt64(this.quantity);
-    }
-    putMyJSON(json) {
+    };
+    AssetBase.prototype.putMyJSON = function (json) {
         json["asset"] = this.assetId.toUnsigned().toString();
         json["quantity"] = this.quantity.toString();
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    AssetBase.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.assetId = long_1.default.fromString(json["asset"], true);
         this.quantity = long_1.default.fromString(json["quantity"]);
         return this;
-    }
-    getAssetId() {
+    };
+    AssetBase.prototype.getAssetId = function () {
         return this.assetId;
-    }
-    getQuantity() {
+    };
+    AssetBase.prototype.getQuantity = function () {
         return this.quantity;
-    }
-}
+    };
+    return AssetBase;
+}(appendix_1.AbstractAppendix));
 exports.AssetBase = AssetBase;
-class AssetIssueMore extends AssetBase {
-    getFee() {
+var AssetIssueMore = /** @class */ (function (_super) {
+    __extends(AssetIssueMore, _super);
+    function AssetIssueMore() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AssetIssueMore.prototype.getFee = function () {
         return fee_1.Fee.ASSET_ISSUE_MORE_FEE;
-    }
-    getAppendixName() {
+    };
+    AssetIssueMore.prototype.getAppendixName = function () {
         return "AssetIssueMore";
-    }
-    getTransactionType() {
+    };
+    AssetIssueMore.prototype.getTransactionType = function () {
         return transaction_type_1.COLORED_COINS_ASSET_ISSUE_MORE_TRANSACTION_TYPE;
-    }
-}
+    };
+    return AssetIssueMore;
+}(AssetBase));
 exports.AssetIssueMore = AssetIssueMore;
-class AssetTransfer extends AssetBase {
-    getFee() {
+var AssetTransfer = /** @class */ (function (_super) {
+    __extends(AssetTransfer, _super);
+    function AssetTransfer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AssetTransfer.prototype.getFee = function () {
         return fee_1.Fee.ASSET_TRANSFER_FEE;
-    }
-    getAppendixName() {
+    };
+    AssetTransfer.prototype.getAppendixName = function () {
         return "AssetTransfer";
-    }
-    getTransactionType() {
+    };
+    AssetTransfer.prototype.getTransactionType = function () {
         return transaction_type_1.COLORED_COINS_ASSET_TRANSFER_TRANSACTION_TYPE;
-    }
-}
+    };
+    return AssetTransfer;
+}(AssetBase));
 exports.AssetTransfer = AssetTransfer;
-class AtomicMultiTransfer extends appendix_1.AbstractAppendix {
-    init(transfers) {
+var AtomicMultiTransfer = /** @class */ (function (_super) {
+    __extends(AtomicMultiTransfer, _super);
+    function AtomicMultiTransfer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AtomicMultiTransfer.prototype.init = function (transfers) {
         this.transfers = transfers;
         return this;
-    }
-    get getTransfers() {
-        return this.transfers;
-    }
-    getFee() {
+    };
+    Object.defineProperty(AtomicMultiTransfer.prototype, "getTransfers", {
+        get: function () {
+            return this.transfers;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    AtomicMultiTransfer.prototype.getFee = function () {
         return fee_1.Fee.ATOMIC_MULTI_TRANSFER_FEE;
-    }
-    getAppendixName() {
+    };
+    AtomicMultiTransfer.prototype.getAppendixName = function () {
         return "AtomicMultiTransfer";
-    }
-    getTransactionType() {
+    };
+    AtomicMultiTransfer.prototype.getTransactionType = function () {
         return transaction_type_1.COLORED_COINS_ATOMIC_MULTI_TRANSFER_TRANSACTION_TYPE;
-    }
-    getMySize() {
+    };
+    AtomicMultiTransfer.prototype.getMySize = function () {
         return 1 + this.transfers.length * (8 + 8 + 8);
-    }
-    putMyBytes(buffer) {
+    };
+    AtomicMultiTransfer.prototype.putMyBytes = function (buffer) {
         buffer.writeByte(this.transfers.length);
         this.transfers.forEach(function (transfer) {
             buffer.writeInt64(long_1.default.fromString(transfer.recipient, true));
             buffer.writeInt64(long_1.default.fromString(transfer.assetId, true));
             buffer.writeInt64(long_1.default.fromString(transfer.quantity));
         });
-    }
-    parse(buffer) {
-        super.parse(buffer);
-        let count = buffer.readByte();
+    };
+    AtomicMultiTransfer.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
+        var count = buffer.readByte();
         this.transfers = [];
-        for (let i = 0; i < count; i++) {
-            let v = {
+        for (var i = 0; i < count; i++) {
+            var v = {
                 recipient: buffer
                     .readInt64()
                     .toUnsigned()
@@ -257,9 +311,9 @@ class AtomicMultiTransfer extends appendix_1.AbstractAppendix {
             this.transfers.push(v);
         }
         return this;
-    }
-    putMyJSON(json) {
-        let ts = [];
+    };
+    AtomicMultiTransfer.prototype.putMyJSON = function (json) {
+        var ts = [];
         this.transfers.forEach(function (transfer) {
             ts.push({
                 recipient: transfer.recipient,
@@ -268,11 +322,11 @@ class AtomicMultiTransfer extends appendix_1.AbstractAppendix {
             });
         });
         json["transfers"] = ts;
-    }
-    parseJSON(json) {
+    };
+    AtomicMultiTransfer.prototype.parseJSON = function (json) {
         this.transfers = [];
-        let ts = json["transfers"];
-        for (let i in ts) {
+        var ts = json["transfers"];
+        for (var i in ts) {
             this.transfers.push({
                 recipient: ts[i].recipient,
                 assetId: ts[i].assetId,
@@ -280,327 +334,378 @@ class AtomicMultiTransfer extends appendix_1.AbstractAppendix {
             });
         }
         return this;
-    }
-}
+    };
+    return AtomicMultiTransfer;
+}(appendix_1.AbstractAppendix));
 exports.AtomicMultiTransfer = AtomicMultiTransfer;
 // ------------------- Colored coins. Orders ----------------------------------------------------------------------------
-class ColoredCoinsOrderPlacement extends appendix_1.AbstractAppendix {
-    init(currencyId, assetId, quantity, price, expiration) {
+var ColoredCoinsOrderPlacement = /** @class */ (function (_super) {
+    __extends(ColoredCoinsOrderPlacement, _super);
+    function ColoredCoinsOrderPlacement() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsOrderPlacement.prototype.init = function (currencyId, assetId, quantity, price, expiration) {
         this.currencyId = long_1.default.fromString(currencyId);
         this.assetId = long_1.default.fromString(assetId);
         this.quantity = long_1.default.fromString(quantity);
         this.price = long_1.default.fromString(price);
         this.expiration = expiration;
         return this;
-    }
-    getMySize() {
+    };
+    ColoredCoinsOrderPlacement.prototype.getMySize = function () {
         return 8 + 8 + 8 + 8 + 4;
-    }
-    putMyBytes(buffer) {
+    };
+    ColoredCoinsOrderPlacement.prototype.putMyBytes = function (buffer) {
         buffer.writeInt64(this.currencyId);
         buffer.writeInt64(this.assetId);
         buffer.writeInt64(this.quantity);
         buffer.writeInt64(this.price);
         buffer.writeInt32(this.expiration);
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    ColoredCoinsOrderPlacement.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.currencyId = buffer.readInt64();
         this.assetId = buffer.readInt64();
         this.quantity = buffer.readInt64();
         this.price = buffer.readInt64();
         this.expiration = buffer.readInt32();
         return this;
-    }
-    putMyJSON(json) {
+    };
+    ColoredCoinsOrderPlacement.prototype.putMyJSON = function (json) {
         json["currency"] = this.currencyId.toUnsigned().toString();
         json["asset"] = this.assetId.toUnsigned().toString();
         json["quantity"] = this.quantity.toString();
         json["price"] = this.price.toString();
         json["expiration"] = this.expiration.toString();
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    ColoredCoinsOrderPlacement.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.currencyId = long_1.default.fromString(json["currency"], true);
         this.assetId = long_1.default.fromString(json["asset"], true);
         this.quantity = long_1.default.fromString(json["quantity"]);
         this.price = long_1.default.fromString(json["price"]);
         this.expiration = json["expiration"];
         return this;
-    }
-    getFee() {
+    };
+    ColoredCoinsOrderPlacement.prototype.getFee = function () {
         return fee_1.Fee.ORDER_PLACEMENT_FEE;
-    }
-    getCurrencyId() {
+    };
+    ColoredCoinsOrderPlacement.prototype.getCurrencyId = function () {
         return this.currencyId;
-    }
-    getAssetId() {
+    };
+    ColoredCoinsOrderPlacement.prototype.getAssetId = function () {
         return this.assetId;
-    }
-    getQuantity() {
+    };
+    ColoredCoinsOrderPlacement.prototype.getQuantity = function () {
         return this.quantity;
-    }
-    getPrice() {
+    };
+    ColoredCoinsOrderPlacement.prototype.getPrice = function () {
         return this.price;
-    }
-    getExpiration() {
+    };
+    ColoredCoinsOrderPlacement.prototype.getExpiration = function () {
         return this.expiration;
-    }
-}
+    };
+    return ColoredCoinsOrderPlacement;
+}(appendix_1.AbstractAppendix));
 exports.ColoredCoinsOrderPlacement = ColoredCoinsOrderPlacement;
-class ColoredCoinsAskOrderPlacement extends ColoredCoinsOrderPlacement {
-    getAppendixName() {
+var ColoredCoinsAskOrderPlacement = /** @class */ (function (_super) {
+    __extends(ColoredCoinsAskOrderPlacement, _super);
+    function ColoredCoinsAskOrderPlacement() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsAskOrderPlacement.prototype.getAppendixName = function () {
         return "AskOrderPlacement";
-    }
-    getTransactionType() {
+    };
+    ColoredCoinsAskOrderPlacement.prototype.getTransactionType = function () {
         return transaction_type_1.COLORED_COINS_ASK_ORDER_PLACEMENT_TRANSACTION_TYPE;
-    }
-}
+    };
+    return ColoredCoinsAskOrderPlacement;
+}(ColoredCoinsOrderPlacement));
 exports.ColoredCoinsAskOrderPlacement = ColoredCoinsAskOrderPlacement;
-class ColoredCoinsBidOrderPlacement extends ColoredCoinsOrderPlacement {
-    getAppendixName() {
+var ColoredCoinsBidOrderPlacement = /** @class */ (function (_super) {
+    __extends(ColoredCoinsBidOrderPlacement, _super);
+    function ColoredCoinsBidOrderPlacement() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsBidOrderPlacement.prototype.getAppendixName = function () {
         return "BidOrderPlacement";
-    }
-    getTransactionType() {
+    };
+    ColoredCoinsBidOrderPlacement.prototype.getTransactionType = function () {
         return transaction_type_1.COLORED_COINS_BID_ORDER_PLACEMENT_TRANSACTION_TYPE;
-    }
-}
+    };
+    return ColoredCoinsBidOrderPlacement;
+}(ColoredCoinsOrderPlacement));
 exports.ColoredCoinsBidOrderPlacement = ColoredCoinsBidOrderPlacement;
-class ColoredCoinsOrderCancellation extends appendix_1.AbstractAppendix {
-    init(orderId) {
+var ColoredCoinsOrderCancellation = /** @class */ (function (_super) {
+    __extends(ColoredCoinsOrderCancellation, _super);
+    function ColoredCoinsOrderCancellation() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsOrderCancellation.prototype.init = function (orderId) {
         this.orderId = long_1.default.fromString(orderId);
         return this;
-    }
-    getMySize() {
+    };
+    ColoredCoinsOrderCancellation.prototype.getMySize = function () {
         return 8;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    ColoredCoinsOrderCancellation.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.orderId = buffer.readInt64();
         return this;
-    }
-    putMyBytes(buffer) {
+    };
+    ColoredCoinsOrderCancellation.prototype.putMyBytes = function (buffer) {
         buffer.writeInt64(this.orderId);
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    ColoredCoinsOrderCancellation.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.orderId = long_1.default.fromString(json["order"], true);
         return this;
-    }
-    putMyJSON(json) {
+    };
+    ColoredCoinsOrderCancellation.prototype.putMyJSON = function (json) {
         json["order"] = this.orderId.toUnsigned().toString();
-    }
-    getFee() {
+    };
+    ColoredCoinsOrderCancellation.prototype.getFee = function () {
         return fee_1.Fee.ORDER_CANCELLATION_FEE;
-    }
-    getOrderId() {
+    };
+    ColoredCoinsOrderCancellation.prototype.getOrderId = function () {
         return this.orderId;
-    }
-}
+    };
+    return ColoredCoinsOrderCancellation;
+}(appendix_1.AbstractAppendix));
 exports.ColoredCoinsOrderCancellation = ColoredCoinsOrderCancellation;
-class ColoredCoinsAskOrderCancellation extends ColoredCoinsOrderCancellation {
-    getAppendixName() {
+var ColoredCoinsAskOrderCancellation = /** @class */ (function (_super) {
+    __extends(ColoredCoinsAskOrderCancellation, _super);
+    function ColoredCoinsAskOrderCancellation() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsAskOrderCancellation.prototype.getAppendixName = function () {
         return "AskOrderCancellation";
-    }
-    getTransactionType() {
+    };
+    ColoredCoinsAskOrderCancellation.prototype.getTransactionType = function () {
         return transaction_type_1.ASK_ORDER_CANCELLATION_TRANSACTION_TYPE;
-    }
-}
+    };
+    return ColoredCoinsAskOrderCancellation;
+}(ColoredCoinsOrderCancellation));
 exports.ColoredCoinsAskOrderCancellation = ColoredCoinsAskOrderCancellation;
-class ColoredCoinsBidOrderCancellation extends ColoredCoinsOrderCancellation {
-    getAppendixName() {
+var ColoredCoinsBidOrderCancellation = /** @class */ (function (_super) {
+    __extends(ColoredCoinsBidOrderCancellation, _super);
+    function ColoredCoinsBidOrderCancellation() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsBidOrderCancellation.prototype.getAppendixName = function () {
         return "BidOrderCancellation";
-    }
-    getTransactionType() {
+    };
+    ColoredCoinsBidOrderCancellation.prototype.getTransactionType = function () {
         return transaction_type_1.BID_ORDER_CANCELLATION_TRANSACTION_TYPE;
-    }
-}
+    };
+    return ColoredCoinsBidOrderCancellation;
+}(ColoredCoinsOrderCancellation));
 exports.ColoredCoinsBidOrderCancellation = ColoredCoinsBidOrderCancellation;
 // ------------------- Colored coins. Whitelist ------------------------------------------------------------------------
-class ColoredCoinsWhitelistAccountAddition extends appendix_1.AbstractAppendix {
-    init(assetId, accountId, endHeight) {
+var ColoredCoinsWhitelistAccountAddition = /** @class */ (function (_super) {
+    __extends(ColoredCoinsWhitelistAccountAddition, _super);
+    function ColoredCoinsWhitelistAccountAddition() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsWhitelistAccountAddition.prototype.init = function (assetId, accountId, endHeight) {
         this.assetId = long_1.default.fromString(assetId);
         this.accountId = long_1.default.fromString(accountId);
         this.endHeight = endHeight;
         return this;
-    }
-    getMySize() {
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.getMySize = function () {
         return 8 + 8 + 4;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.assetId = buffer.readInt64();
         this.accountId = buffer.readInt64();
         this.endHeight = buffer.readInt32();
         return this;
-    }
-    putMyBytes(buffer) {
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.putMyBytes = function (buffer) {
         buffer.writeInt64(this.assetId);
         buffer.writeInt64(this.accountId);
         buffer.writeInt32(this.endHeight);
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.assetId = long_1.default.fromString(json["asset"], true);
         this.accountId = long_1.default.fromString(json["account"], true);
         this.endHeight = json["endHeight"];
         return this;
-    }
-    putMyJSON(json) {
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.putMyJSON = function (json) {
         json["asset"] = this.assetId.toUnsigned().toString();
         json["account"] = this.accountId.toUnsigned().toString();
         json["endHeight"] = this.endHeight;
-    }
-    getAppendixName() {
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.getAppendixName = function () {
         return "WhitelistAccountAddition";
-    }
-    getTransactionType() {
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.getTransactionType = function () {
         return transaction_type_1.WHITELIST_ACCOUNT_ADDITION_TRANSACTION_TYPE;
-    }
-    getFee() {
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.getFee = function () {
         return fee_1.Fee.WHITELIST_ACCOUNT_FEE;
-    }
-    getAssetId() {
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.getAssetId = function () {
         return this.assetId;
-    }
-    getAccountId() {
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.getAccountId = function () {
         return this.accountId;
-    }
-    getEndHeight() {
+    };
+    ColoredCoinsWhitelistAccountAddition.prototype.getEndHeight = function () {
         return this.endHeight;
-    }
-}
+    };
+    return ColoredCoinsWhitelistAccountAddition;
+}(appendix_1.AbstractAppendix));
 exports.ColoredCoinsWhitelistAccountAddition = ColoredCoinsWhitelistAccountAddition;
-class ColoredCoinsWhitelistAccountRemoval extends appendix_1.AbstractAppendix {
-    init(assetId, accountId) {
+var ColoredCoinsWhitelistAccountRemoval = /** @class */ (function (_super) {
+    __extends(ColoredCoinsWhitelistAccountRemoval, _super);
+    function ColoredCoinsWhitelistAccountRemoval() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsWhitelistAccountRemoval.prototype.init = function (assetId, accountId) {
         this.assetId = long_1.default.fromString(assetId);
         this.accountId = long_1.default.fromString(accountId);
         return this;
-    }
-    getMySize() {
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.getMySize = function () {
         return 8 + 8;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.assetId = buffer.readInt64();
         this.accountId = buffer.readInt64();
         return this;
-    }
-    putMyBytes(buffer) {
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.putMyBytes = function (buffer) {
         buffer.writeInt64(this.assetId);
         buffer.writeInt64(this.accountId);
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.assetId = long_1.default.fromString(json["asset"], true);
         this.accountId = long_1.default.fromString(json["account"], true);
         return this;
-    }
-    putMyJSON(json) {
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.putMyJSON = function (json) {
         json["asset"] = this.assetId.toUnsigned().toString();
         json["account"] = this.accountId.toUnsigned().toString();
-    }
-    getAppendixName() {
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.getAppendixName = function () {
         return "WhitelistAccountRemoval";
-    }
-    getTransactionType() {
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.getTransactionType = function () {
         return transaction_type_1.WHITELIST_ACCOUNT_REMOVAL_TRANSACTION_TYPE;
-    }
-    getFee() {
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.getFee = function () {
         return fee_1.Fee.WHITELIST_ACCOUNT_FEE;
-    }
-    getAssetId() {
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.getAssetId = function () {
         return this.assetId;
-    }
-    getAccountId() {
+    };
+    ColoredCoinsWhitelistAccountRemoval.prototype.getAccountId = function () {
         return this.accountId;
-    }
-}
+    };
+    return ColoredCoinsWhitelistAccountRemoval;
+}(appendix_1.AbstractAppendix));
 exports.ColoredCoinsWhitelistAccountRemoval = ColoredCoinsWhitelistAccountRemoval;
-class ColoredCoinsWhitelistMarket extends appendix_1.AbstractAppendix {
-    init(currencyId, assetId) {
+var ColoredCoinsWhitelistMarket = /** @class */ (function (_super) {
+    __extends(ColoredCoinsWhitelistMarket, _super);
+    function ColoredCoinsWhitelistMarket() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColoredCoinsWhitelistMarket.prototype.init = function (currencyId, assetId) {
         this.currencyId = long_1.default.fromString(currencyId);
         this.assetId = long_1.default.fromString(assetId);
         return this;
-    }
-    getMySize() {
+    };
+    ColoredCoinsWhitelistMarket.prototype.getMySize = function () {
         return 8 + 8;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    ColoredCoinsWhitelistMarket.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.currencyId = buffer.readInt64();
         this.assetId = buffer.readInt64();
         return this;
-    }
-    putMyBytes(buffer) {
+    };
+    ColoredCoinsWhitelistMarket.prototype.putMyBytes = function (buffer) {
         buffer.writeInt64(this.currencyId);
         buffer.writeInt64(this.assetId);
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    ColoredCoinsWhitelistMarket.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.currencyId = long_1.default.fromString(json["currency"], true);
         this.assetId = long_1.default.fromString(json["asset"], true);
         return this;
-    }
-    putMyJSON(json) {
+    };
+    ColoredCoinsWhitelistMarket.prototype.putMyJSON = function (json) {
         json["currency"] = this.currencyId.toUnsigned().toString();
         json["asset"] = this.assetId.toUnsigned().toString();
-    }
-    getAppendixName() {
+    };
+    ColoredCoinsWhitelistMarket.prototype.getAppendixName = function () {
         return "WhitelistMarket";
-    }
-    getTransactionType() {
+    };
+    ColoredCoinsWhitelistMarket.prototype.getTransactionType = function () {
         return transaction_type_1.WHITELIST_MARKET_TRANSACTION_TYPE;
-    }
-    getFee() {
+    };
+    ColoredCoinsWhitelistMarket.prototype.getFee = function () {
         return fee_1.Fee.WHITELIST_MARKET_FEE;
-    }
-    getAssetId() {
+    };
+    ColoredCoinsWhitelistMarket.prototype.getAssetId = function () {
         return this.assetId;
-    }
-    getCurrencyId() {
+    };
+    ColoredCoinsWhitelistMarket.prototype.getCurrencyId = function () {
         return this.currencyId;
-    }
-}
+    };
+    return ColoredCoinsWhitelistMarket;
+}(appendix_1.AbstractAppendix));
 exports.ColoredCoinsWhitelistMarket = ColoredCoinsWhitelistMarket;
 // ------------------- AccountControlEffectiveBalanceLeasing -----------------------------------------------------------
-class AccountControlEffectiveBalanceLeasing extends appendix_1.AbstractAppendix {
-    init(period) {
+var AccountControlEffectiveBalanceLeasing = /** @class */ (function (_super) {
+    __extends(AccountControlEffectiveBalanceLeasing, _super);
+    function AccountControlEffectiveBalanceLeasing() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    AccountControlEffectiveBalanceLeasing.prototype.init = function (period) {
         this.period = period;
         return this;
-    }
-    getMySize() {
+    };
+    AccountControlEffectiveBalanceLeasing.prototype.getMySize = function () {
         return 4;
-    }
-    parse(buffer) {
-        super.parse(buffer);
+    };
+    AccountControlEffectiveBalanceLeasing.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
         this.period = buffer.readInt32();
         return this;
-    }
-    putMyBytes(buffer) {
+    };
+    AccountControlEffectiveBalanceLeasing.prototype.putMyBytes = function (buffer) {
         buffer.writeInt32(this.period);
-    }
-    parseJSON(json) {
-        super.parseJSON(json);
+    };
+    AccountControlEffectiveBalanceLeasing.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
         this.period = json["period"];
         return this;
-    }
-    putMyJSON(json) {
+    };
+    AccountControlEffectiveBalanceLeasing.prototype.putMyJSON = function (json) {
         json["period"] = this.period;
-    }
-    getAppendixName() {
+    };
+    AccountControlEffectiveBalanceLeasing.prototype.getAppendixName = function () {
         return "EffectiveBalanceLeasing";
-    }
-    getTransactionType() {
+    };
+    AccountControlEffectiveBalanceLeasing.prototype.getTransactionType = function () {
         return transaction_type_1.EFFECTIVE_BALANCE_LEASING_TRANSACTION_TYPE;
-    }
-    getFee() {
+    };
+    AccountControlEffectiveBalanceLeasing.prototype.getFee = function () {
         return fee_1.Fee.EFFECTIVE_BALANCE_LEASING_FEE;
-    }
-    getPeriod() {
+    };
+    AccountControlEffectiveBalanceLeasing.prototype.getPeriod = function () {
         return this.period;
-    }
-}
+    };
+    return AccountControlEffectiveBalanceLeasing;
+}(appendix_1.AbstractAppendix));
 exports.AccountControlEffectiveBalanceLeasing = AccountControlEffectiveBalanceLeasing;
 exports.ORDINARY_PAYMENT = new Payment();
 exports.ARBITRARY_MESSAGE = new Message();

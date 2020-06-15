@@ -22,9 +22,9 @@
  * */
 import { byteArrayToString, stringToByteArray, hexStringToByteArray, byteArrayToHexString } from "./converters"
 import { readBytes, writeBytes } from "./utils"
+import Long from "long"
 import * as ByteBuffer from "bytebuffer"
 import { Fee } from "./fee"
-import Long from "long"
 import { MAX_INT32, MIN_INT32, MAX_ENCRYPTED_MESSAGE_LENGTH } from "./constants"
 import { IEncryptedMessage, fullNameToLong } from "./crypto"
 

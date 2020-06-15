@@ -21,10 +21,10 @@
  * SOFTWARE.
  * */
 import "./jasmine"
-import * as crypto from "../src/crypto"
+import { calculateStringHash, calculateFullHash, fullNameToHash, fullNameToLong, calculateTransactionId, secretPhraseToPublicKey, getPrivateKey, getAccountId, getAccountIdFromPublicKey, signBytes, verifyBytes, encryptNote, decryptMessage, encryptBinaryNote, encryptMessage, passphraseEncrypt, passphraseDecrypt, random8Values, random16Values, random32Values } from "../src/crypto"
 import { IEncryptOptions } from "../src/crypto"
 import { hexStringToByteArray, stringToByteArray } from "../src/converters"
-import * as Long from "long"
+import Long from "long"
 
 let bob = {
   secretPhrase: "floor battle paper consider stranger blind alter blur bless wrote prove cloud",
@@ -40,25 +40,25 @@ let alice = {
   account: "1522541402758811473"
 }
 
-describe("crypto.calculateStringHash test", () => {
+describe("calculateStringHash test", () => {
   it("is a function", () => {
-    expect(crypto.calculateStringHash).toBeInstanceOf(Function)
+    expect(calculateStringHash).toBeInstanceOf(Function)
   })
   it("returns a hash", () => {
-    expect(crypto.calculateStringHash("hello world")).toBe(
+    expect(calculateStringHash("hello world")).toBe(
       "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
     )
   })
 })
 
-describe("crypto.calculateFullHash test", () => {
+describe("calculateFullHash test", () => {
   it("is a function", () => {
-    expect(crypto.calculateFullHash).toBeInstanceOf(Function)
+    expect(calculateFullHash).toBeInstanceOf(Function)
   })
   it("returns a full hash", () => {
     // testnet transaction: 4879568308965317604, TRANSFER HEAT From 4644748344150906433 to 4729421738299387565 amount 0.20000000 HEAT
     expect(
-      crypto.calculateFullHash(
+      calculateFullHash(
         "001015e33607a005b27b12f1982c6c57da981a4dcefe2ae75b00f0665b813e1b634c0b716e48524dad6e58700348a241002d31010000000040420f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000004a800300397775e7050e6bd60001cfa1a9c50f968a5679afc1bf655a57c304303b0ebb8e1bb47ef9d466494ac117ffffffffffffff7f",
         "f011760e7223ebd198ab1f482e594136583e80ab77d431800379a4510019450cda62b822c637806283d192134650a43f96b81354b2d5f8a9c9b0463440be20dc"
       )
@@ -66,85 +66,85 @@ describe("crypto.calculateFullHash test", () => {
   })
 })
 
-describe("crypto.fullNameToHash test", () => {
+describe("fullNameToHash test", () => {
   it("is a function", () => {
-    expect(crypto.fullNameToHash).toBeInstanceOf(Function)
+    expect(fullNameToHash).toBeInstanceOf(Function)
   })
   it("returns a full name hash", () => {
-    expect(crypto.fullNameToHash("oskol@heatwallet.com")).toBe("8932144534527668929")
+    expect(fullNameToHash("oskol@heatwallet.com")).toBe("8932144534527668929")
   })
 })
 
-describe("crypto.fullNameToLong test", () => {
+describe("fullNameToLong test", () => {
   it("is a function", () => {
-    expect(crypto.fullNameToLong).toBeInstanceOf(Function)
+    expect(fullNameToLong).toBeInstanceOf(Function)
   })
   it("returns a full name hash", () => {
     let bytes = stringToByteArray("oskol@heatwallet.com")
-    expect(crypto.fullNameToLong(bytes)).toEqual(Long.fromString("8932144534527668929"))
+    expect(fullNameToLong(bytes)).toEqual(Long.fromString("8932144534527668929"))
   })
 })
 
-describe("crypto.calculateTransactionId test", () => {
+describe("calculateTransactionId test", () => {
   it("is a function", () => {
-    expect(crypto.calculateTransactionId).toBeInstanceOf(Function)
+    expect(calculateTransactionId).toBeInstanceOf(Function)
   })
   it("calculates transaction id", () => {
     expect(
-      crypto.calculateTransactionId(
+      calculateTransactionId(
         "e48a89bc32b628815f0323bcf888b00ee5903baee5af0fe55600c8f0e59b0d97"
       )
     ).toBe("9306888958988880612")
   })
 })
 
-describe("crypto.secretPhraseToPublicKey test", () => {
+describe("secretPhraseToPublicKey test", () => {
   it("is a function", () => {
-    expect(crypto.secretPhraseToPublicKey).toBeInstanceOf(Function)
+    expect(secretPhraseToPublicKey).toBeInstanceOf(Function)
   })
   it("returns public key of secret phrase", () => {
-    expect(crypto.secretPhraseToPublicKey(bob.secretPhrase)).toBe(bob.publicKeyStr)
-    expect(crypto.secretPhraseToPublicKey(alice.secretPhrase)).toBe(alice.publicKeyStr)
+    expect(secretPhraseToPublicKey(bob.secretPhrase)).toBe(bob.publicKeyStr)
+    expect(secretPhraseToPublicKey(alice.secretPhrase)).toBe(alice.publicKeyStr)
   })
 })
 
-describe("crypto.getPrivateKey test", () => {
+describe("getPrivateKey test", () => {
   it("is a function", () => {
-    expect(crypto.getPrivateKey).toBeInstanceOf(Function)
+    expect(getPrivateKey).toBeInstanceOf(Function)
   })
   it("returns private key", () => {
-    expect(crypto.getPrivateKey(bob.secretPhrase)).toBe(bob.privateKeyStr)
-    expect(crypto.getPrivateKey(alice.secretPhrase)).toBe(alice.privateKeyStr)
+    expect(getPrivateKey(bob.secretPhrase)).toBe(bob.privateKeyStr)
+    expect(getPrivateKey(alice.secretPhrase)).toBe(alice.privateKeyStr)
   })
 })
 
-describe("crypto.getAccountId test", () => {
+describe("getAccountId test", () => {
   it("is a function", () => {
-    expect(crypto.getAccountId).toBeInstanceOf(Function)
+    expect(getAccountId).toBeInstanceOf(Function)
   })
   it("returns account id", () => {
-    expect(crypto.getAccountId(bob.secretPhrase)).toBe(bob.account)
-    expect(crypto.getAccountId(alice.secretPhrase)).toBe(alice.account)
+    expect(getAccountId(bob.secretPhrase)).toBe(bob.account)
+    expect(getAccountId(alice.secretPhrase)).toBe(alice.account)
   })
 })
 
-describe("crypto.getAccountIdFromPublicKey test", () => {
+describe("getAccountIdFromPublicKey test", () => {
   it("is a function", () => {
-    expect(crypto.getAccountIdFromPublicKey).toBeInstanceOf(Function)
+    expect(getAccountIdFromPublicKey).toBeInstanceOf(Function)
   })
   it("returns account id", () => {
-    expect(crypto.getAccountIdFromPublicKey(bob.publicKeyStr)).toBe(bob.account)
-    expect(crypto.getAccountIdFromPublicKey(alice.publicKeyStr)).toBe(alice.account)
+    expect(getAccountIdFromPublicKey(bob.publicKeyStr)).toBe(bob.account)
+    expect(getAccountIdFromPublicKey(alice.publicKeyStr)).toBe(alice.account)
   })
 })
 
-describe("crypto.signBytes test", () => {
+describe("signBytes test", () => {
   it("is a function", () => {
-    expect(crypto.signBytes).toBeInstanceOf(Function)
+    expect(signBytes).toBeInstanceOf(Function)
   })
   it("sign bytes", () => {
     expect(
-      crypto.signBytes(
+      signBytes(
         "0010a0ed3607a005b27b12f1982c6c57da981a4dcefe2ae75b00f0665b813e1b634c0b716e48524dac1119b939a5b31c00e1f5050000000040420f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a7800300e01292c7e82a773f00ffffffffffffff7f",
         "7573657231" /*from API: TODO pass secretphrase as string instead of HEX string, convert to hex string ourselves.*/
       )
@@ -154,13 +154,13 @@ describe("crypto.signBytes test", () => {
   })
 })
 
-describe("crypto.verifyBytes test", () => {
+describe("verifyBytes test", () => {
   it("is a function", () => {
-    expect(crypto.verifyBytes).toBeInstanceOf(Function)
+    expect(verifyBytes).toBeInstanceOf(Function)
   })
   it("verify bytes", () => {
     expect(
-      crypto.verifyBytes(
+      verifyBytes(
         "04ddc8ca22d67bb8e65226add5a3857a64cc0d1851ea60f118a7f52968e690049bcb0ab367b2aa313a0eedcf89ca0579f9c1ff1ba7c74085227ff82d92b1daac",
         "001075ea3607a005b27b12f1982c6c57da981a4dcefe2ae75b00f0665b813e1b634c0b716e48524dac1119b939a5b31c0065cd1d0000000040420f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000086800300dd2fc17fe7ccdd5c00ffffffffffffff7f",
         "b27b12f1982c6c57da981a4dcefe2ae75b00f0665b813e1b634c0b716e48524d"
@@ -169,9 +169,9 @@ describe("crypto.verifyBytes test", () => {
   })
 })
 
-describe("crypto.encryptNote test", () => {
+describe("encryptNote test", () => {
   it("is a function", () => {
-    expect(crypto.encryptNote).toBeInstanceOf(Function)
+    expect(encryptNote).toBeInstanceOf(Function)
   })
   it("returns encrypted note", () => {
     let text = "qwerty1 näkökenttäsi лыжи 政府信息公开发布平台"
@@ -180,10 +180,9 @@ describe("crypto.encryptNote test", () => {
       privateKey: hexStringToByteArray(bob.privateKeyStr),
       publicKey: hexStringToByteArray(bob.publicKeyStr)
     }
-    return crypto
-      .encryptNote(text, options, bob.secretPhrase)
+    return encryptNote(text, options, bob.secretPhrase)
       .then(encrypted => {
-        let decrypted = crypto.decryptMessage(
+        let decrypted = decryptMessage(
           encrypted.message,
           encrypted.nonce,
           bob.publicKeyStr,
@@ -195,22 +194,21 @@ describe("crypto.encryptNote test", () => {
   })
 })
 
-describe("crypto.encryptBinaryNote test", () => {
+describe("encryptBinaryNote test", () => {
   it("is a function", () => {
-    expect(crypto.encryptBinaryNote).toBeInstanceOf(Function)
+    expect(encryptBinaryNote).toBeInstanceOf(Function)
   })
   it("encrypts binary note", () => {
     let text = "qwerty1"
-    let options: crypto.IEncryptOptions = {
+    let options: IEncryptOptions = {
       account: bob.account,
       privateKey: hexStringToByteArray(bob.privateKeyStr),
       publicKey: hexStringToByteArray(bob.publicKeyStr)
     }
 
-    return crypto
-      .encryptBinaryNote(stringToByteArray(text), options, bob.secretPhrase /*todo with true*/)
+    return encryptBinaryNote(stringToByteArray(text), options, bob.secretPhrase /*todo with true*/)
       .then(encrypted => {
-        let decrypted = crypto.decryptMessage(
+        let decrypted = decryptMessage(
           encrypted.message,
           encrypted.nonce,
           bob.publicKeyStr,
@@ -221,15 +219,15 @@ describe("crypto.encryptBinaryNote test", () => {
   })
 })
 
-describe("crypto.encryptMessage, crypto.decryptMessage test", () => {
+describe("encryptMessage, decryptMessage test", () => {
   it("is a function", () => {
-    expect(crypto.encryptMessage).toBeInstanceOf(Function)
-    expect(crypto.decryptMessage).toBeInstanceOf(Function)
+    expect(encryptMessage).toBeInstanceOf(Function)
+    expect(decryptMessage).toBeInstanceOf(Function)
   })
   it("encrypts, decrypts message", () => {
     let text = "qwerty ♠═~☺"
-    return crypto.encryptMessage(text, bob.publicKeyStr, bob.secretPhrase).then(encrypted => {
-      let decrypted = crypto.decryptMessage(
+    return encryptMessage(text, bob.publicKeyStr, bob.secretPhrase).then(encrypted => {
+      let decrypted = decryptMessage(
         encrypted.data,
         encrypted.nonce,
         bob.publicKeyStr,
@@ -241,41 +239,41 @@ describe("crypto.encryptMessage, crypto.decryptMessage test", () => {
   })
 })
 
-describe("crypto.passphraseEncrypt, crypto.passphraseDecrypt test", () => {
+describe("passphraseEncrypt, passphraseDecrypt test", () => {
   it("is a function", () => {
-    expect(crypto.passphraseEncrypt).toBeInstanceOf(Function)
-    expect(crypto.passphraseDecrypt).toBeInstanceOf(Function)
+    expect(passphraseEncrypt).toBeInstanceOf(Function)
+    expect(passphraseDecrypt).toBeInstanceOf(Function)
   })
   it("encrypts, decrypts text using passprase", () => {
     let text = "qwerty !@#$%^ 12345"
     let passphrase = "qaz plm [].,/"
-    let encrypted = crypto.passphraseEncrypt(text, passphrase)
-    let decrypted = crypto.passphraseDecrypt(encrypted, passphrase)
+    let encrypted = passphraseEncrypt(text, passphrase)
+    let decrypted = passphraseDecrypt(encrypted, passphrase)
 
     expect(decrypted).toBe(text)
   })
 })
 
-describe("crypto.random8Values, crypto.random16Values, crypto.random32Values test", () => {
+describe("random8Values, random16Values, random32Values test", () => {
   it("are functions", () => {
-    expect(crypto.random8Values).toBeInstanceOf(Function)
-    expect(crypto.random16Values).toBeInstanceOf(Function)
-    expect(crypto.random32Values).toBeInstanceOf(Function)
+    expect(random8Values).toBeInstanceOf(Function)
+    expect(random16Values).toBeInstanceOf(Function)
+    expect(random32Values).toBeInstanceOf(Function)
   })
   it("returns Uint8Array", () => {
-    return crypto.random8Values(4).then(array => {
+    return random8Values(4).then(array => {
       expect(array).toBeInstanceOf(Uint8Array)
       return expect(array.length).toBe(4)
     })
   })
   it("returns Uint16Array", () => {
-    return crypto.random16Values(4).then(array => {
+    return random16Values(4).then(array => {
       expect(array).toBeInstanceOf(Uint16Array)
       return expect(array.length).toBe(4)
     })
   })
   it("returns Uint32Array", () => {
-    return crypto.random32Values(4).then(array => {
+    return random32Values(4).then(array => {
       expect(array).toBeInstanceOf(Uint32Array)
       return expect(array.length).toBe(4)
     })
@@ -294,11 +292,11 @@ describe("crypto.random8Values, crypto.random16Values, crypto.random32Values tes
     // let random32Stats: number[] = new Array(GROUPNUM)
     // random32Stats.fill(0)
     // for (let i = 0; i < N; i++) {
-    //   random8 = crypto.getRandomValues(random8)
+    //   random8 = getRandomValues(random8)
     //   random8.map(v => random8Stats[v % GROUPNUM]++)
-    //   random32 = crypto.random32Values(GROUPNUM)
+    //   random32 = random32Values(GROUPNUM)
     //   random32.map(v => random32Stats[v % GROUPNUM]++)
-    //   random16 = crypto.random16Values(GROUPNUM)
+    //   random16 = random16Values(GROUPNUM)
     //   random16.map(v => random16Stats[v % GROUPNUM]++)
     // }
     // console.log(
@@ -310,9 +308,9 @@ describe("crypto.random8Values, crypto.random16Values, crypto.random32Values tes
     // console.log(
     //   N + " random 32 bits numbers distribution in 8 groups: " + random32Stats
     // )
-    // random8 = crypto.getRandomValues(random8)
-    // random16 = crypto.random16Values(8)
-    // random32 = crypto.random32Values(8)
+    // random8 = getRandomValues(random8)
+    // random16 = random16Values(8)
+    // random32 = random32Values(8)
     // expect(random8.length).toBe(8)
     // expect(random16.length).toBe(8)
     // expect(random32.length).toBe(8)

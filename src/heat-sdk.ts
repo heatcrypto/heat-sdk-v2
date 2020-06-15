@@ -26,7 +26,6 @@ import * as utils from "./utils"
 import * as _attachment from "./attachment"
 import * as builder from "./builder"
 import * as transaction from "./transaction"
-import { SecretGenerator } from "./secret-generator"
 import {
   AssetIssuance,
   AssetTransfer,
@@ -73,7 +72,6 @@ export class HeatSDK {
   public crypto = crypto
   public converters = converters
   public config: Configuration
-  public secretGenerator = new SecretGenerator()
   public setRandomSource = setRandomSource
 
   constructor(config?: Configuration) {
@@ -148,7 +146,7 @@ export class HeatSDK {
 
   public assetIssuance(
     descriptionUrl: string,
-    descriptionHash: number[],
+    descriptionHash: number[] | null,
     quantity: string,
     decimals: number,
     dillutable: boolean,

@@ -48,7 +48,7 @@ export class Transaction {
 
   constructor(
     private heatsdk: HeatSDK,
-    private recipientOrRecipientPublicKey: string,
+    private recipientOrRecipientPublicKey: string | null,
     private builder: Builder
   ) { }
 
@@ -80,7 +80,7 @@ export class Transaction {
         recipientPublicKeyHex = secretPhraseToPublicKey(secretPhrase)
 
       if (!recipientPublicKeyHex)
-        recipientPublicKeyHex = isPublicKey(this.recipientOrRecipientPublicKey)
+        recipientPublicKeyHex = isPublicKey(this.recipientOrRecipientPublicKey!)
           ? this.recipientOrRecipientPublicKey
           : null
 
@@ -93,7 +93,7 @@ export class Transaction {
           )
           .recipientId(getAccountIdFromPublicKey(recipientPublicKeyHex))
       } else {
-        this.builder.recipientId(this.recipientOrRecipientPublicKey)
+        this.builder.recipientId(this.recipientOrRecipientPublicKey!)
       }
 
       if (isDefined(this.publicMessage_)) {

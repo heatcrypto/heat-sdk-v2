@@ -22,13 +22,12 @@
  * */
 
 ///<reference path="../node_modules/@types/jest/index.d.ts"/>
-///<reference path="testnet.ts"/>
 
 /*
 To run tests in the file  test/testnet.ts  must be actual values for Testnet
  */
 import "./jasmine"
-import { testnet } from "./testnet"
+import { ASSET_1, ASSET_2, ACCOUNT_21 } from "./testnet"
 import { Builder, TransactionImpl } from "../src/builder"
 import { Transaction } from "../src/transaction"
 import {
@@ -48,10 +47,9 @@ import {
   ORDINARY_PAYMENT
 } from "../src/attachment"
 import { byteArrayToHexString, hexStringToByteArray, stringToHexString } from "../src/converters"
-import * as crypto from "../src/crypto"
 import { Configuration, HeatSDK } from "../src/heat-sdk"
-//import Long = require("long");
-import * as Long from "long"
+import { HeatApi } from "./heat-api"
+import { signBytes } from "../src/crypto"
 
 const heatsdk = new HeatSDK(
   new Configuration({
@@ -60,14 +58,17 @@ const heatsdk = new HeatSDK(
     // websocketURL: "ws://localhost:7755/ws/"
   })
 )
+const heatapi = new HeatApi({
+  baseURL: 'https://alpha.heatledger.com:7734/api/v1'
+})
 
-function handleApiResponse(response) {
+function handleApiResponse(response: any) {
   //console.log(response)
   expect(response).toBeDefined()
   expect(response.errorCode).toBeUndefined()
 }
 
-function handleCatchApiResponse(response) {
+function handleCatchApiResponse(response: any) {
   //console.log(response)
   expect(response).toBeDefined()
   expect(response.errorCode).toBeDefined()
@@ -76,13 +77,13 @@ function handleCatchApiResponse(response) {
 function testServerParsing(txn: Transaction): Promise<any> {
   return txn.sign("hello").then(t => {
     let transaction = t.getTransaction()
-    let bytes = transaction.getBytesAsHex()
+    let bytes = transaction!.getBytesAsHex()
     let t2 = TransactionImpl.parse(bytes)
     //console.log(transaction.getJSONObject())
     expect(t2).toBeInstanceOf(TransactionImpl)
-    expect(t2.getJSONObject()).toEqual(transaction.getJSONObject())
+    expect(t2.getJSONObject()).toEqual(transaction!.getJSONObject())
 
-    return heatsdk.api
+    return heatapi
       .post("/tx/parse", { transactionBytes: bytes })
       .then(response => {
         handleApiResponse(response)
@@ -98,13 +99,13 @@ function testServerParsing(txn: Transaction): Promise<any> {
 function checkapplicability(txn: Transaction): Promise<any> {
   return txn.sign("user1").then(t => {
     let transaction = t.getTransaction()
-    let bytes = transaction.getBytesAsHex()
+    let bytes = transaction!.getBytesAsHex()
     let t2 = TransactionImpl.parse(bytes)
     //console.log(transaction.getJSONObject())
     expect(t2).toBeInstanceOf(TransactionImpl)
-    expect(t2.getJSONObject()).toEqual(transaction.getJSONObject())
+    expect(t2.getJSONObject()).toEqual(transaction!.getJSONObject())
 
-    return heatsdk.api
+    return heatapi
       .post("/tx/check", { transactionBytes: bytes })
       .then(response => {
         handleApiResponse(response)
@@ -136,7 +137,7 @@ describe("Transaction builder", () => {
       .sign("secret phrase")
       .then(t => {
         let transaction = t.getTransaction()
-        let bytes = transaction.getBytesAsHex()
+        let bytes = transaction!.getBytesAsHex()
         return expect(bytes).toEqual(expect.any(String))
       })
   })
@@ -148,7 +149,7 @@ describe("Transaction builder", () => {
       .sign("secret phrase")
       .then(t => {
         let transaction = t.getTransaction()
-        let bytes = transaction.getUnsignedBytes()
+        let bytes = transaction!.getUnsignedBytes()
         return expect(bytes).toEqual(expect.any(Array))
       })
   })
@@ -160,7 +161,7 @@ describe("Transaction builder", () => {
       .sign("secret phrase")
       .then(t => {
         let transaction = t.getTransaction()
-        return expect(transaction.getJSONObject()).toEqual({
+        return expect(transaction!.getJSONObject()).toEqual({
           type: 0,
           subtype: 0,
           timestamp: expect.any(Number),
@@ -578,8 +579,8 @@ describe("Transaction builder", () => {
     let secretPhrase =
       "floor battle paper consider stranger blind alter blur bless wrote prove cloud"
     let unsignedHex = byteArrayToHexString(bytes)
-    let signatureHex = crypto.signBytes(unsignedHex, stringToHexString(secretPhrase))
-    let signature = hexStringToByteArray(signatureHex)
+    let signatureHex = signBytes(unsignedHex, stringToHexString(secretPhrase))
+    let signature = hexStringToByteArray(signatureHex!)
 
     let expectedSignature = [
       -68,
@@ -658,10 +659,10 @@ describe("Transaction builder", () => {
       .sign("secret phrase")
       .then(t => {
         let transaction = t.getTransaction()
-        let bytes = transaction.getBytesAsHex()
+        let bytes = transaction!.getBytesAsHex()
         let parsedTxn = TransactionImpl.parse(bytes)
         expect(parsedTxn).toBeInstanceOf(TransactionImpl)
-        return expect(parsedTxn.getJSONObject()).toEqual(transaction.getJSONObject())
+        return expect(parsedTxn.getJSONObject()).toEqual(transaction!.getJSONObject())
       })
   })
 
@@ -684,7 +685,7 @@ describe("Transaction builder", () => {
 
   it("can parse 'Asset Issuance more' transaction bytes on the server", done => {
     let builder = new Builder()
-      .attachment(new AssetIssueMore().init(testnet.ASSET_1.ID, "100"))
+      .attachment(new AssetIssueMore().init(ASSET_1.ID, "100"))
       .amountHQT("0")
       .feeHQT("50000000000")
     testServerParsing(new Transaction(heatsdk, "123", builder)).then(response => {
@@ -695,7 +696,7 @@ describe("Transaction builder", () => {
 
   xit("can parse 'Asset Transfer' transaction bytes on the server", done => {
     let builder = new Builder()
-      .attachment(new AssetTransfer().init(testnet.ASSET_1.ID, "100"))
+      .attachment(new AssetTransfer().init(ASSET_1.ID, "100"))
       .amountHQT("0")
       .feeHQT("50000000000")
     checkapplicability(new Transaction(heatsdk, "123", builder)).then(response => {
@@ -714,8 +715,8 @@ describe("Transaction builder", () => {
     let builder = new Builder()
       .attachment(
         new ColoredCoinsAskOrderPlacement().init(
-          testnet.ASSET_1.ID,
-          testnet.ASSET_2.ID,
+          ASSET_1.ID,
+          ASSET_2.ID,
           "100",
           "700000000",
           3600
@@ -740,8 +741,8 @@ describe("Transaction builder", () => {
     let builder = new Builder()
       .attachment(
         new ColoredCoinsBidOrderPlacement().init(
-          testnet.ASSET_1.ID,
-          testnet.ASSET_2.ID,
+          ASSET_1.ID,
+          ASSET_2.ID,
           "100",
           "700000000",
           3600
@@ -784,42 +785,46 @@ describe("Transaction builder", () => {
     })
   })
 
-  it("can parse 'Whitelist Account Addition' transaction bytes on the server", done => {
-    let builder = new Builder()
-      .attachment(
-        new ColoredCoinsWhitelistAccountAddition().init(
-          testnet.ASSET_1.ID,
-          testnet.ACCOUNT_21.ID,
-          11223344
-        )
-      )
-      .amountHQT("0")
-      .feeHQT("1000000")
-    testServerParsing(new Transaction(heatsdk, "123", builder)).then(response => {
-      expect(response.errorDescription).toMatch("NotYetEnabledException")
-      done()
-    })
-  })
+  // TODO test for 'Whitelist Account Addition'
 
-  it("can parse 'Whitelist Account Removal' transaction bytes on the server", done => {
-    let builder = new Builder()
-      .attachment(
-        new ColoredCoinsWhitelistAccountRemoval().init(testnet.ASSET_1.ID, testnet.ACCOUNT_21.ID)
-      )
-      .amountHQT("0")
-      .feeHQT("1000000")
-    testServerParsing(new Transaction(heatsdk, "123", builder)).then(response => {
-      expect(response.errorDescription).toMatch("NotYetEnabledException")
-      done()
-    })
-  })
+  // it("can parse 'Whitelist Account Addition' transaction bytes on the server", done => {
+  //   let builder = new Builder()
+  //     .attachment(
+  //       new ColoredCoinsWhitelistAccountAddition().init(
+  //         ASSET_1.ID,
+  //         ACCOUNT_21.ID,
+  //         11223344
+  //       )
+  //     )
+  //     .amountHQT("0")
+  //     .feeHQT("10000000000")
+  //   testServerParsing(new Transaction(heatsdk, "123", builder)).then(response => {
+  //     expect(response.errorDescription).toMatch("NotYetEnabledException")
+  //     done()
+  //   })
+  // })
+
+  // TODO test for 'Whitelist Account Removal'
+
+  // it("can parse 'Whitelist Account Removal' transaction bytes on the server", done => {
+  //   let builder = new Builder()
+  //     .attachment(
+  //       new ColoredCoinsWhitelistAccountRemoval().init(ASSET_1.ID, ACCOUNT_21.ID)
+  //     )
+  //     .amountHQT("0")
+  //     .feeHQT("10000000000")
+  //   testServerParsing(new Transaction(heatsdk, "123", builder)).then(response => {
+  //     expect(response.errorDescription).toMatch("NotYetEnabledException")
+  //     done()
+  //   })
+  // })
 
   it("can parse 'Whitelist Market' transaction bytes on the server", done => {
     let builder = new Builder()
-      .attachment(new ColoredCoinsWhitelistMarket().init("0", testnet.ASSET_1.ID))
+      .attachment(new ColoredCoinsWhitelistMarket().init("0", ASSET_1.ID))
       .amountHQT("0")
       .feeHQT("1000000000")
-    testServerParsing(new Transaction(heatsdk, testnet.ASSET_1.ISSUER.ID, builder)).then(
+    testServerParsing(new Transaction(heatsdk, ASSET_1.ISSUER.ID, builder)).then(
       response => {
         expect(response.errorDescription).toMatch("Only asset issuer can allow a market")
         done()
@@ -856,10 +861,10 @@ describe("Transaction builder", () => {
       .sign("secret phrase")
       .then(t => {
         let transaction = t.getTransaction()
-        let bytes = transaction.getBytesAsHex()
+        let bytes = transaction!.getBytesAsHex()
         let parsedTxn = TransactionImpl.parse(bytes)
         expect(parsedTxn).toBeInstanceOf(TransactionImpl)
-        return expect(parsedTxn.getJSONObject()).toEqual(transaction.getJSONObject())
+        return expect(parsedTxn.getJSONObject()).toEqual(transaction!.getJSONObject())
       })
   })
 

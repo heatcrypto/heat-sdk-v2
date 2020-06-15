@@ -93,7 +93,7 @@ export class AssetIssuance extends AbstractAppendix implements Attachment {
 
   init(
     descriptionUrl: string,
-    descriptionHash: number[],
+    descriptionHash: number[] | null,
     quantity: string,
     decimals: number,
     dillutable: boolean

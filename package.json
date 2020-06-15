@@ -31,27 +31,49 @@
     "node": ">=10.0.0"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "rollup -c && rimraf compiled && typedoc --sourcefile-url-prefix 'https://github.com/Heat-Ledger-Ltd/heat-sdk/blob/master/src/' --out dist/docs --target es6 --theme minimal src",
-    "buildfast": "rimraf dist && rollup -c && rimraf compiled",
-    "start": "rollup -c -w",
     "test": "jest --forceExit",
-    "test:watch": "jest --watch",
-    "test:prod": "npm run test",
     "tsc": "tsc ./src/heat-sdk.ts"
   },
   "devDependencies": {
     "@types/big.js": "^4.0.5",
     "@types/bytebuffer": "^5.0.41",
+    "@types/jest": "^26.0.0",
     "@types/long": "^4.0.1",
+    "@types/node-fetch": "^2.5.7",
     "@types/pako": "^1.0.1",
+    "jest": "^26.0.1",
+    "node-fetch": "^2.6.0",
+    "ts-jest": "^26.1.0",
     "tslint": "^6.1.2",
     "typescript": "^3.9.5"
   },
   "dependencies": {
     "big.js": "^5.2.2",
     "bytebuffer": "^5.0.1",
-    "long": "^4.0.0",
+    "long": "^3.2.0",
     "pako": "^1.0.11"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
+      }
+    }
   }
 }

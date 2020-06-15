@@ -21,7 +21,7 @@
  * SOFTWARE.
  * */
 import "./jasmine"
-import { calculateStringHash, calculateFullHash, fullNameToHash, fullNameToLong, calculateTransactionId, secretPhraseToPublicKey, getPrivateKey, getAccountId, getAccountIdFromPublicKey, signBytes, verifyBytes, encryptNote, decryptMessage, encryptBinaryNote, encryptMessage, passphraseEncrypt, passphraseDecrypt, random8Values, random16Values, random32Values } from "../src/crypto"
+import { calculateStringHash, calculateFullHash, fullNameToHash, fullNameToLong, calculateTransactionId, secretPhraseToPublicKey, getPrivateKey, getAccountId, getAccountIdFromPublicKey, signBytes, verifyBytes, encryptNote, decryptMessage, encryptBinaryNote, encryptMessage, passphraseEncrypt, passphraseDecrypt, random8Values, random16Values, random32Values, getPublicKeyFromPrivateKey } from "../src/crypto"
 import { IEncryptOptions } from "../src/crypto"
 import { hexStringToByteArray, stringToByteArray } from "../src/converters"
 import * as Long from "long"
@@ -115,6 +115,19 @@ describe("getPrivateKey test", () => {
   it("returns private key", () => {
     expect(getPrivateKey(bob.secretPhrase)).toBe(bob.privateKeyStr)
     expect(getPrivateKey(alice.secretPhrase)).toBe(alice.privateKeyStr)
+  })
+})
+
+describe("getPublicKeyFromPrivateKey test", () => {
+  it("is a function", () => {
+    expect(getPublicKeyFromPrivateKey).toBeInstanceOf(Function)
+  })
+  it("returns public key", () => {
+    const privateKey = 'c7e7327f3f4dee9837a8e909945012a362022371edfbd5de5839579914de0b69'
+    const publicKey = '29d6b689261fceae9a5e56e01c9a447e28c7fb572dde6dc8ba6f00ebca871b40'
+    const accountId = '14917505173645061641'
+    expect(getPublicKeyFromPrivateKey(privateKey)).toEqual(publicKey)
+    expect(getAccountIdFromPublicKey(publicKey)).toEqual(accountId)
   })
 })
 

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.passphraseDecrypt = exports.passphraseEncrypt = exports.PassphraseEncryptedMessage = exports.decryptMessage = exports.encryptMessage = exports.encryptBinaryNote = exports.encryptNote = exports.verifyBytes = exports.signBytes = exports.getAccountIdFromPublicKey = exports.getAccountId = exports.getPrivateKey = exports.secretPhraseToPublicKey = exports.calculateTransactionId = exports.fullNameToLong = exports.fullNameToHash = exports.calculateFullHash = exports.byteArrayToBigInteger = exports.calculateHashBytes = exports.calculateStringHash = exports.random32Values = exports.random16Values = exports.random8Values = exports.SHA256 = void 0;
+exports.passphraseDecrypt = exports.passphraseEncrypt = exports.PassphraseEncryptedMessage = exports.decryptMessage = exports.encryptMessage = exports.encryptBinaryNote = exports.encryptNote = exports.verifyBytes = exports.signBytes = exports.getAccountIdFromPublicKey = exports.getAccountId = exports.getPublicKeyFromPrivateKey = exports.getPrivateKey = exports.secretPhraseToPublicKey = exports.calculateTransactionId = exports.fullNameToLong = exports.fullNameToHash = exports.calculateFullHash = exports.byteArrayToBigInteger = exports.calculateHashBytes = exports.calculateStringHash = exports.random32Values = exports.random16Values = exports.random8Values = exports.SHA256 = void 0;
 /**
  * The MIT License (MIT)
  * Copyright (c) 2020 heatcrypto.
@@ -156,6 +156,16 @@ function getPrivateKey(secretPhrase) {
     return converters_1.shortArrayToHexString(curve25519_clamp(converters_1.byteArrayToShortArray(SHA256_finalize())));
 }
 exports.getPrivateKey = getPrivateKey;
+/**
+ *
+ * @param privateKeyHex
+ */
+function getPublicKeyFromPrivateKey(privateKeyHex) {
+    var secretPhraseBytes = converters_1.hexStringToByteArray(privateKeyHex);
+    var digest = simpleHash(secretPhraseBytes);
+    return converters_1.byteArrayToHexString(curve25519.keygen(digest).p);
+}
+exports.getPublicKeyFromPrivateKey = getPublicKeyFromPrivateKey;
 /**
  * @param secretPhrase Ascii String
  * @returns String

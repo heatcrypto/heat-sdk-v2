@@ -168,6 +168,16 @@ export function getPrivateKey(secretPhrase: string) {
 }
 
 /**
+ * 
+ * @param privateKeyHex 
+ */
+export function getPublicKeyFromPrivateKey(privateKeyHex: string) {
+  var secretPhraseBytes = hexStringToByteArray(privateKeyHex)
+  var digest = simpleHash(secretPhraseBytes)
+  return byteArrayToHexString(curve25519.keygen(digest).p)
+}
+
+/**
  * @param secretPhrase Ascii String
  * @returns String
  */

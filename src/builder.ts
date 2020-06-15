@@ -1,6 +1,4 @@
-/// <reference types="bytebuffer" />
-/// <reference types="long" />
-/*
+/**
  * The MIT License (MIT)
  * Copyright (c) 2020 heatcrypto.
  *

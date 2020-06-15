@@ -1,6 +1,6 @@
-/*
+/**
  * The MIT License (MIT)
- * Copyright (c) 2017 Heat Ledger Ltd.
+ * Copyright (c) 2020 heatcrypto.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -36,7 +36,6 @@ import {
   AtomicMultiTransfer
 } from "./attachment"
 import { Fee } from "./fee"
-import { setRandomSource } from "./random-bytes"
 import { AtomicTransfer } from "./attachment"
 
 export const attachment = _attachment
@@ -72,7 +71,6 @@ export class HeatSDK {
   public crypto = crypto
   public converters = converters
   public config: Configuration
-  public setRandomSource = setRandomSource
 
   constructor(config?: Configuration) {
     const config_ = config ? config : new Configuration()

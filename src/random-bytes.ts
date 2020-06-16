@@ -35,3 +35,7 @@ export function randomBytes(length: number): Promise<Uint8Array> {
 export interface RandomUint8ArrayProvider {
   generate(length: number): Promise<Uint8Array>
 }
+
+export function randomBytesSync(length: number) {
+  return _randomBytes(length)
+}

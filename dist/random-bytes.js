@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.randomBytes = void 0;
+exports.randomBytesSync = exports.randomBytes = void 0;
 /**
  * The MIT License (MIT)
  * Copyright (c) 2020 heatcrypto.
@@ -36,3 +36,7 @@ function randomBytes(length) {
     });
 }
 exports.randomBytes = randomBytes;
+function randomBytesSync(length) {
+    return crypto_1.randomBytes(length);
+}
+exports.randomBytesSync = randomBytesSync;

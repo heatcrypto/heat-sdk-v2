@@ -27,12 +27,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.passphraseDecrypt = exports.passphraseEncrypt = exports.PassphraseEncryptedMessage = exports.decryptMessage = exports.encryptMessage = exports.encryptBinaryNote = exports.encryptNote = exports.verifyBytes = exports.signBytes = exports.getAccountIdFromPublicKey = exports.getAccountId = exports.getPublicKeyFromPrivateKey = exports.getPrivateKey = exports.secretPhraseToPublicKey = exports.calculateTransactionId = exports.fullNameToLong = exports.fullNameToHash = exports.calculateFullHash = exports.byteArrayToBigInteger = exports.calculateStringHash = exports.random32Values = exports.random16Values = exports.random8Values = exports.SHA256 = void 0;
 var converters_1 = require("./converters");
-var big_js_1 = __importDefault(require("big.js"));
+var Big = require('big.js');
 var pako_1 = require("pako");
 var long_1 = __importDefault(require("long"));
 var random_bytes_1 = require("./random-bytes");
-var curve25519_1 = require("curve25519");
-var cryptojs_1 = require("cryptojs");
+var curve25519_js_1 = require("curve25519/dist/curve25519.js");
+var CryptoJS_1 = require("cryptojs/dist/CryptoJS");
 var crypto_1 = require("crypto");
 var SHA256_hash;
 function SHA256_init() {
@@ -86,11 +86,11 @@ exports.calculateStringHash = calculateStringHash;
  * @returns Big
  */
 function byteArrayToBigInteger(byteArray, startIndex) {
-    var value = big_js_1.default("0");
+    var value = Big("0");
     var temp1, temp2;
     for (var i = byteArray.length - 1; i >= 0; i--) {
-        temp1 = value.times(big_js_1.default("256"));
-        temp2 = temp1.plus(big_js_1.default(byteArray[i].toString(10)));
+        temp1 = value.times(Big("256"));
+        temp2 = temp1.plus(Big(byteArray[i].toString(10)));
         value = temp2;
     }
     return value;
@@ -149,7 +149,7 @@ function secretPhraseToPublicKey(secretPhrase) {
     var secretHex = converters_1.stringToHexString(secretPhrase);
     var secretPhraseBytes = converters_1.hexStringToByteArray(secretHex);
     var digest = simpleHash(secretPhraseBytes);
-    return converters_1.byteArrayToHexString(curve25519_1.curve25519.keygen(digest).p);
+    return converters_1.byteArrayToHexString(curve25519_js_1.curve25519.keygen(digest).p);
 }
 exports.secretPhraseToPublicKey = secretPhraseToPublicKey;
 /**
@@ -160,7 +160,7 @@ exports.secretPhraseToPublicKey = secretPhraseToPublicKey;
 function getPrivateKey(secretPhrase) {
     SHA256_init();
     SHA256_write(converters_1.stringToByteArray(secretPhrase));
-    return converters_1.shortArrayToHexString(curve25519_1.curve25519_clamp(converters_1.byteArrayToShortArray(SHA256_finalize())));
+    return converters_1.shortArrayToHexString(curve25519_js_1.curve25519_clamp(converters_1.byteArrayToShortArray(SHA256_finalize())));
 }
 exports.getPrivateKey = getPrivateKey;
 /**
@@ -170,7 +170,7 @@ exports.getPrivateKey = getPrivateKey;
 function getPublicKeyFromPrivateKey(privateKeyHex) {
     var secretPhraseBytes = converters_1.hexStringToByteArray(privateKeyHex);
     var digest = simpleHash(secretPhraseBytes);
-    return converters_1.byteArrayToHexString(curve25519_1.curve25519.keygen(digest).p);
+    return converters_1.byteArrayToHexString(curve25519_js_1.curve25519.keygen(digest).p);
 }
 exports.getPublicKeyFromPrivateKey = getPublicKeyFromPrivateKey;
 /**
@@ -206,18 +206,18 @@ function signBytes(message, secretPhrase) {
     var messageBytes = converters_1.hexStringToByteArray(message);
     var secretPhraseBytes = converters_1.hexStringToByteArray(secretPhrase);
     var digest = simpleHash(secretPhraseBytes);
-    var s = curve25519_1.curve25519.keygen(digest).s;
+    var s = curve25519_js_1.curve25519.keygen(digest).s;
     var m = simpleHash(messageBytes);
     _hash.init();
     _hash.update(m);
     _hash.update(s);
     var x = _hash.getBytes();
-    var y = curve25519_1.curve25519.keygen(x).p;
+    var y = curve25519_js_1.curve25519.keygen(x).p;
     _hash.init();
     _hash.update(m);
     _hash.update(y);
     var h = _hash.getBytes();
-    var v = curve25519_1.curve25519.sign(h, x, s);
+    var v = curve25519_js_1.curve25519.sign(h, x, s);
     if (v)
         return converters_1.byteArrayToHexString(v.concat(h));
 }
@@ -235,7 +235,7 @@ function verifyBytes(signature, message, publicKey) {
     var publicKeyBytes = converters_1.hexStringToByteArray(publicKey);
     var v = signatureBytes.slice(0, 32);
     var h = signatureBytes.slice(32);
-    var y = curve25519_1.curve25519.verify(v, h, publicKeyBytes);
+    var y = curve25519_js_1.curve25519.verify(v, h, publicKeyBytes);
     var m = simpleHash(messageBytes);
     _hash.init();
     _hash.update(m);
@@ -312,7 +312,7 @@ exports.encryptBinaryNote = encryptBinaryNote;
  * @returns ByteArray
  */
 function getSharedKey(key1, key2) {
-    return converters_1.shortArrayToByteArray(curve25519_1.curve25519_(converters_1.byteArrayToShortArray(key1), converters_1.byteArrayToShortArray(key2), null));
+    return converters_1.shortArrayToByteArray(curve25519_js_1.curve25519_(converters_1.byteArrayToShortArray(key1), converters_1.byteArrayToShortArray(key2), null));
 }
 function encryptData(plaintext, options, uncompressed) {
     return random_bytes_1.randomBytes(32)
@@ -343,9 +343,9 @@ function aesEncrypt(plaintext, options) {
             sharedKey[i] ^= options.nonce[i];
         }
         var tmp = bytes;
-        var key = cryptojs_1.CryptoJS.SHA256(converters_1.byteArrayToWordArray(sharedKey));
+        var key = CryptoJS_1.CryptoJS.SHA256(converters_1.byteArrayToWordArray(sharedKey));
         var iv = converters_1.byteArrayToWordArray(tmp);
-        var encrypted = cryptojs_1.CryptoJS.AES.encrypt(text, key, {
+        var encrypted = CryptoJS_1.CryptoJS.AES.encrypt(text, key, {
             iv: iv
         });
         var ivOut = converters_1.wordArrayToByteArray(encrypted.iv);
@@ -411,13 +411,13 @@ function aesDecrypt(ivCiphertext, options) {
     for (var i = 0; i < 32; i++) {
         sharedKey[i] ^= options.nonce[i];
     }
-    var key = cryptojs_1.CryptoJS.SHA256(converters_1.byteArrayToWordArray(sharedKey));
-    var encrypted = cryptojs_1.CryptoJS.lib.CipherParams.create({
+    var key = CryptoJS_1.CryptoJS.SHA256(converters_1.byteArrayToWordArray(sharedKey));
+    var encrypted = CryptoJS_1.CryptoJS.lib.CipherParams.create({
         ciphertext: ciphertext,
         iv: iv,
         key: key
     });
-    var decrypted = cryptojs_1.CryptoJS.AES.decrypt(encrypted, key, {
+    var decrypted = CryptoJS_1.CryptoJS.AES.decrypt(encrypted, key, {
         iv: iv
     });
     var plaintext = converters_1.wordArrayToByteArray(decrypted);
@@ -441,41 +441,41 @@ var PassphraseEncryptedMessage = /** @class */ (function () {
 }());
 exports.PassphraseEncryptedMessage = PassphraseEncryptedMessage;
 function passphraseEncrypt(message, passphrase) {
-    var salt = cryptojs_1.CryptoJS.lib.WordArray.random(256 / 8);
-    var key = cryptojs_1.CryptoJS.PBKDF2(passphrase, salt, {
+    var salt = CryptoJS_1.CryptoJS.lib.WordArray.random(256 / 8);
+    var key = CryptoJS_1.CryptoJS.PBKDF2(passphrase, salt, {
         iterations: 10,
-        hasher: cryptojs_1.CryptoJS.algo.SHA256
+        hasher: CryptoJS_1.CryptoJS.algo.SHA256
     });
-    var iv = cryptojs_1.CryptoJS.lib.WordArray.random(128 / 8);
-    var encrypted = cryptojs_1.CryptoJS.AES.encrypt(message, key, { iv: iv });
-    var ciphertext = cryptojs_1.CryptoJS.enc.Base64.stringify(encrypted.ciphertext);
-    var salt_str = cryptojs_1.CryptoJS.enc.Hex.stringify(salt);
-    var iv_str = cryptojs_1.CryptoJS.enc.Hex.stringify(iv);
-    var key_str = cryptojs_1.CryptoJS.enc.Hex.stringify(key);
-    var HMAC = cryptojs_1.CryptoJS.HmacSHA256(ciphertext + iv_str, key_str);
-    var HMAC_str = cryptojs_1.CryptoJS.enc.Hex.stringify(HMAC);
+    var iv = CryptoJS_1.CryptoJS.lib.WordArray.random(128 / 8);
+    var encrypted = CryptoJS_1.CryptoJS.AES.encrypt(message, key, { iv: iv });
+    var ciphertext = CryptoJS_1.CryptoJS.enc.Base64.stringify(encrypted.ciphertext);
+    var salt_str = CryptoJS_1.CryptoJS.enc.Hex.stringify(salt);
+    var iv_str = CryptoJS_1.CryptoJS.enc.Hex.stringify(iv);
+    var key_str = CryptoJS_1.CryptoJS.enc.Hex.stringify(key);
+    var HMAC = CryptoJS_1.CryptoJS.HmacSHA256(ciphertext + iv_str, key_str);
+    var HMAC_str = CryptoJS_1.CryptoJS.enc.Hex.stringify(HMAC);
     return new PassphraseEncryptedMessage(ciphertext, salt_str, iv_str, HMAC_str);
 }
 exports.passphraseEncrypt = passphraseEncrypt;
 function passphraseDecrypt(cp, passphrase) {
-    var iv = cryptojs_1.CryptoJS.enc.Hex.parse(cp.iv);
-    var salt = cryptojs_1.CryptoJS.enc.Hex.parse(cp.salt);
-    var key = cryptojs_1.CryptoJS.PBKDF2(passphrase, salt, {
+    var iv = CryptoJS_1.CryptoJS.enc.Hex.parse(cp.iv);
+    var salt = CryptoJS_1.CryptoJS.enc.Hex.parse(cp.salt);
+    var key = CryptoJS_1.CryptoJS.PBKDF2(passphrase, salt, {
         iterations: 10,
-        hasher: cryptojs_1.CryptoJS.algo.SHA256
+        hasher: CryptoJS_1.CryptoJS.algo.SHA256
     });
-    var ciphertext = cryptojs_1.CryptoJS.enc.Base64.parse(cp.ciphertext);
-    var key_str = cryptojs_1.CryptoJS.enc.Hex.stringify(key);
-    var HMAC = cryptojs_1.CryptoJS.HmacSHA256(cp.ciphertext + cp.iv, key_str);
-    var HMAC_str = cryptojs_1.CryptoJS.enc.Hex.stringify(HMAC);
+    var ciphertext = CryptoJS_1.CryptoJS.enc.Base64.parse(cp.ciphertext);
+    var key_str = CryptoJS_1.CryptoJS.enc.Hex.stringify(key);
+    var HMAC = CryptoJS_1.CryptoJS.HmacSHA256(cp.ciphertext + cp.iv, key_str);
+    var HMAC_str = CryptoJS_1.CryptoJS.enc.Hex.stringify(HMAC);
     // compare HMACs
     if (HMAC_str != cp.HMAC) {
         return null;
     }
-    var _cp = cryptojs_1.CryptoJS.lib.CipherParams.create({
+    var _cp = CryptoJS_1.CryptoJS.lib.CipherParams.create({
         ciphertext: ciphertext
     });
-    var decrypted = cryptojs_1.CryptoJS.AES.decrypt(_cp, key, { iv: iv });
-    return decrypted.toString(cryptojs_1.CryptoJS.enc.Utf8);
+    var decrypted = CryptoJS_1.CryptoJS.AES.decrypt(_cp, key, { iv: iv });
+    return decrypted.toString(CryptoJS_1.CryptoJS.enc.Utf8);
 }
 exports.passphraseDecrypt = passphraseDecrypt;

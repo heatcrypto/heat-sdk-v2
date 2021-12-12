@@ -1,6 +1,6 @@
 {
   "name": "heat-sdk-v2",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "HEAT support libraries for Node.js",
   "keywords": [
     "heat",
@@ -34,7 +34,7 @@
     "build": "npm run test && rimraf dist && tsc --project tsconfig.json"
   },
   "devDependencies": {
-    "@types/big.js": "^4.0.5",
+    "@types/big.js": "6.1.2",
     "@types/bytebuffer": "^5.0.41",
     "@types/jest": "^26.0.0",
     "@types/long": "^4.0.1",
@@ -48,7 +48,7 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
-    "big.js": "5.2.2",
+    "big.js": "6.1.1",
     "bytebuffer": "5.0.1",
     "long": "3.2.0",
     "pako": "1.0.11",

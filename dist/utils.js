@@ -173,8 +173,8 @@ function convertToQNTf(quantity) {
 }
 exports.convertToQNTf = convertToQNTf;
 function calculateTotalOrderPriceQNT(quantityQNT, priceQNT) {
-    return new big_js_1.default(quantityQNT)
-        .times(new big_js_1.default(priceQNT).div(new big_js_1.default(100000000)))
+    return big_js_1.default(quantityQNT)
+        .times(big_js_1.default(priceQNT).div(big_js_1.default(100000000)))
         .round()
         .toString();
 }

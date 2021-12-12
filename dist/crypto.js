@@ -27,7 +27,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.passphraseDecrypt = exports.passphraseEncrypt = exports.PassphraseEncryptedMessage = exports.decryptMessage = exports.encryptMessage = exports.encryptBinaryNote = exports.encryptNote = exports.verifyBytes = exports.signBytes = exports.getAccountIdFromPublicKey = exports.getAccountId = exports.getPublicKeyFromPrivateKey = exports.getPrivateKey = exports.secretPhraseToPublicKey = exports.calculateTransactionId = exports.fullNameToLong = exports.fullNameToHash = exports.calculateFullHash = exports.byteArrayToBigInteger = exports.calculateStringHash = exports.random32Values = exports.random16Values = exports.random8Values = exports.SHA256 = void 0;
 var converters_1 = require("./converters");
-var Big = require('big.js');
+var big_js_1 = __importDefault(require("big.js"));
 var pako_1 = require("pako");
 var long_1 = __importDefault(require("long"));
 var random_bytes_1 = require("./random-bytes");
@@ -86,11 +86,11 @@ exports.calculateStringHash = calculateStringHash;
  * @returns Big
  */
 function byteArrayToBigInteger(byteArray, startIndex) {
-    var value = Big("0");
+    var value = big_js_1.default("0");
     var temp1, temp2;
     for (var i = byteArray.length - 1; i >= 0; i--) {
-        temp1 = value.times(Big("256"));
-        temp2 = temp1.plus(Big(byteArray[i].toString(10)));
+        temp1 = value.times(big_js_1.default("256"));
+        temp2 = temp1.plus(big_js_1.default(byteArray[i].toString(10)));
         value = temp2;
     }
     return value;

@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-const Big = require('big.js');
+import Big from 'big.js';
 import { hexStringToByteArray } from "./converters"
 import ByteBuffer from "bytebuffer"
 

@@ -33,7 +33,7 @@ import {
   stringToHexString,
   wordArrayToByteArray
 } from "./converters"
-const Big = require('big.js');
+import Big from 'big.js';
 import { gzip, inflate } from "pako"
 import Long from "long"
 import { randomBytes } from "./random-bytes"

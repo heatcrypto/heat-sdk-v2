@@ -2,17 +2,21 @@
 <head>
     <script src="./dist/index.js"></script>
     <script>
-        let config = new __sdk__.Configuration({ isTestnet: true })
-        let sdk = new __sdk__.HeatSDK(config)
+        //HEAT SDK can be exposed as some functions
+        let pubKey = __heat__.HEAT_GET_PUBLICKEY_FROM_PRIVATEKEY({privateKeyAsHex: "12"})
 
-        let builder = new __sdk__.Builder()
+        //HEAT SDK can be used directly
+        let config = new __heat__.Configuration({ isTestnet: true })
+        let sdk = new __heat__.HeatSDK()
+
+        let builder = new __heat__.Builder()
             .isTestnet(config.isTestnet)
             .genesisKey(config.genesisKey)
-            .attachment(new __sdk__.attachment.ColoredCoinsWhitelistMarket().init("0", "9827585868724319515"))
+            .attachment(new __heat__.attachment.ColoredCoinsWhitelistMarket().init("0", "9827585868724319515"))
             .amountHQT("0")
             .feeHQT("1000000000")
 
-        let txn = new __sdk__.Transaction(sdk, "0", builder)
+        let txn = new __heat__.Transaction(sdk, "0", builder)
         txn.publicMessage("heat-sdk test")
             .sign("test secret phrase 1")
             .then(t => {

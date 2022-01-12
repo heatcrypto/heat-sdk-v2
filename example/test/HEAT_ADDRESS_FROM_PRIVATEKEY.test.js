@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { HEAT_ADDRESS_FROM_PRIVATEKEY } = require('../src');
+const {HEAT_ADDRESS_FROM_PRIVATEKEY} = require("../src")
 
 describe('HEAT_ADDRESS_FROM_PRIVATEKEY', () => {
   it('should return an address', () => {

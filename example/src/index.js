@@ -115,9 +115,12 @@ function isValidAddress(value) {
   return isString(value) && !isNaN(Number(value)) && Number(value) != 0
 }
 
-module.exports = {
+var g = typeof globalThis === "undefined" ? global : globalThis;
+g['__methods__'] = module.exports = {
   HEAT_GET_PUBLICKEY_FROM_PRIVATEKEY,
   HEAT_ADDRESS_FROM_PRIVATEKEY,
   HEAT_GET_ADDRESS_FROM_PUBLICKEY,
   HEAT_TRANSFER_HEAT,
 }
+
+

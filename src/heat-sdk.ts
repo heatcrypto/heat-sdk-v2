@@ -47,16 +47,16 @@ export interface ConfigArgs {
   isTestnet?: boolean
   baseURL?: string
   websocketURL?: string
-  genesisKey?: Array<number>
+  genesisKey?: number[]
 }
 
 export class Configuration {
   isTestnet = false
-  genesisKey: Array<number>|undefined
+  genesisKey: number[]|undefined
   constructor(args?: ConfigArgs) {
     if (args) {
       if (utils.isDefined(args.isTestnet)) this.isTestnet = !!args.isTestnet
-      if (utils.isDefined(args.genesisKey)) this.genesisKey = <Array<number>>args.genesisKey
+      if (utils.isDefined(args.genesisKey)) this.genesisKey = <number[]>args.genesisKey
     }
     if (!utils.isDefined(this.genesisKey)) {
       if (this.isTestnet) {
@@ -75,6 +75,15 @@ export class HeatSDK {
   constructor(config?: Configuration) {
     const config_ = config ? config : new Configuration()
     this.config = config_
+  }
+
+  /**
+   * Create new configured builder
+   */
+  public builder() {
+    return new Builder()
+        .isTestnet(this.config.isTestnet)
+        .genesisKey(this.config.genesisKey)
   }
 
   public parseTransactionBytes(transactionBytesHex: string) {
@@ -98,9 +107,7 @@ export class HeatSDK {
     return new Transaction(
       this,
       recipientOrRecipientPublicKey,
-      new Builder()
-        .isTestnet(this.config.isTestnet)
-        .genesisKey(this.config.genesisKey)
+      this.builder()
         .attachment(attachment.ORDINARY_PAYMENT)
         .amountHQT(utils.convertToQNT(amount))
     )
@@ -110,9 +117,7 @@ export class HeatSDK {
     return new Transaction(
       this,
       recipientOrRecipientPublicKey,
-      new Builder()
-        .isTestnet(this.config.isTestnet)
-        .genesisKey(this.config.genesisKey)
+      this.builder()
         .attachment(attachment.ARBITRARY_MESSAGE)
         .amountHQT("0")
     ).publicMessage(message)
@@ -122,9 +127,7 @@ export class HeatSDK {
     return new Transaction(
       this,
       recipientPublicKey,
-      new Builder()
-        .isTestnet(this.config.isTestnet)
-        .genesisKey(this.config.genesisKey)
+      this.builder()
         .attachment(attachment.ARBITRARY_MESSAGE)
         .amountHQT("0")
     ).privateMessage(message)
@@ -134,9 +137,7 @@ export class HeatSDK {
     return new Transaction(
       this,
       null, // if null and provide private message then to send encrypted message to self
-      new Builder()
-        .isTestnet(this.config.isTestnet)
-        .genesisKey(this.config.genesisKey)
+      this.builder()
         .attachment(attachment.ARBITRARY_MESSAGE)
         .amountHQT("0")
     ).privateMessageToSelf(message)
@@ -150,9 +151,7 @@ export class HeatSDK {
     dillutable: boolean,
     feeHQT?: string
   ) {
-    let builder = new Builder()
-      .isTestnet(this.config.isTestnet)
-      .genesisKey(this.config.genesisKey)
+    let builder = this.builder()
       .attachment(
         new AssetIssuance().init(descriptionUrl, descriptionHash, quantity, decimals, dillutable)
       )
@@ -167,9 +166,7 @@ export class HeatSDK {
     quantity: string,
     feeHQT?: string
   ) {
-    let builder = new Builder()
-      .isTestnet(this.config.isTestnet)
-      .genesisKey(this.config.genesisKey)
+    let builder = this.builder()
       .attachment(new AssetTransfer().init(assetId, quantity))
       .amountHQT("0")
       .feeHQT(feeHQT ? feeHQT : Fee.ASSET_TRANSFER_FEE)
@@ -181,9 +178,7 @@ export class HeatSDK {
     transfers: AtomicTransfer[],
     feeHQT?: string
   ) {
-    let builder = new Builder()
-      .isTestnet(this.config.isTestnet)
-      .genesisKey(this.config.genesisKey)
+    let builder = this.builder()
       .attachment(new AtomicMultiTransfer().init(transfers))
       .amountHQT("0")
       .feeHQT(feeHQT ? feeHQT : Fee.ATOMIC_MULTI_TRANSFER_FEE)
@@ -197,9 +192,7 @@ export class HeatSDK {
     price: string,
     expiration: number
   ) {
-    let builder = new Builder()
-      .isTestnet(this.config.isTestnet)
-      .genesisKey(this.config.genesisKey)
+    let builder = this.builder()
       .attachment(
         new ColoredCoinsAskOrderPlacement().init(currencyId, assetId, quantity, price, expiration)
       )
@@ -215,9 +208,7 @@ export class HeatSDK {
     price: string,
     expiration: number
   ) {
-    let builder = new Builder()
-      .isTestnet(this.config.isTestnet)
-      .genesisKey(this.config.genesisKey)
+    let builder = this.builder()
       .attachment(
         new ColoredCoinsBidOrderPlacement().init(currencyId, assetId, quantity, price, expiration)
       )
@@ -227,9 +218,7 @@ export class HeatSDK {
   }
 
   public cancelAskOrder(orderId: string) {
-    let builder = new Builder()
-      .isTestnet(this.config.isTestnet)
-      .genesisKey(this.config.genesisKey)
+    let builder = this.builder()
       .attachment(new ColoredCoinsAskOrderCancellation().init(orderId))
       .amountHQT("0")
       .feeHQT("1000000")
@@ -237,9 +226,7 @@ export class HeatSDK {
   }
 
   public cancelBidOrder(orderId: string) {
-    let builder = new Builder()
-      .isTestnet(this.config.isTestnet)
-      .genesisKey(this.config.genesisKey)
+    let builder = this.builder()
       .attachment(new ColoredCoinsBidOrderCancellation().init(orderId))
       .amountHQT("0")
       .feeHQT("1000000")

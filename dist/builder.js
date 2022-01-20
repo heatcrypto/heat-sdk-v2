@@ -475,8 +475,9 @@ var TransactionImpl = /** @class */ (function () {
         position <<= 1;
         if ((flags & position) != 0)
             builder.publicNameAssignment(new appendix_1.AppendixPublicNameAssignment().parse(buffer));
-        if (isTestnet)
-            buffer.readLong();
+        if (isTestnet) {
+            builder.genesisKey([buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(),]);
+        }
         return new TransactionImpl(builder, null);
     };
     return TransactionImpl;

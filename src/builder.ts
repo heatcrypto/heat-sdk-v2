@@ -22,9 +22,11 @@
  * */
 import { TransactionType } from "./transaction-type"
 import { Attachment } from "./attachment"
-import { AppendixMessage, AppendixEncryptedMessage, AppendixEncryptToSelfMessage, 
-  AppendixPublicKeyAnnouncement, AppendixPrivateNameAnnouncement, AppendixPrivateNameAssignment, 
-  AppendixPublicNameAnnouncement, AppendixPublicNameAssignment, Appendix } from "./appendix"
+import {
+  AppendixMessage, AppendixEncryptedMessage, AppendixEncryptToSelfMessage,
+  AppendixPublicKeyAnnouncement, AppendixPrivateNameAnnouncement, AppendixPrivateNameAssignment,
+  AppendixPublicNameAnnouncement, AppendixPublicNameAssignment, Appendix
+} from "./appendix"
 import { isDefined, extend, isEmpty } from "./utils"
 import { hexStringToByteArray, byteArrayToHexString, stringToHexString } from "./converters"
 import { secretPhraseToPublicKey, signBytes, verifyBytes } from "./crypto"
@@ -538,7 +540,9 @@ export class TransactionImpl {
     position <<= 1
     if ((flags & position) != 0)
       builder.publicNameAssignment(new AppendixPublicNameAssignment().parse(buffer))
-    if (isTestnet) buffer.readLong()
+    if (isTestnet) {
+      builder.genesisKey([buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(),]);
+    }
 
     return new TransactionImpl(builder, null)
   }

@@ -1,4 +1,5 @@
 const { getPublicKeyFromPrivateKey, getAccountIdFromPublicKey } = require('heat-sdk-v2/dist/crypto');
+const utils = require('heat-sdk-v2/dist/utils');
 const { HeatSDK, Configuration, Builder, attachment, Transaction } = require("heat-sdk-v2")
 const { isString, isBoolean } = require('lodash');
 
@@ -125,7 +126,8 @@ g['__heat__'] = module.exports = {
     Configuration,
     Builder,
     Transaction,
-    attachment
+    attachment,
+    utils
 }
 
 

@@ -2,6 +2,25 @@
 <head>
     <script src="./dist/index.js"></script>
     <script>
+
+        let testnetURL = "https://alpha.heatledger.com:7734/api/v1/tx/broadcast"
+        //let testnetURL = "http://localhost:7733/api/v1/tx/broadcast"
+        async function broadcast(transactionBytesHEX) {
+          const response = await fetch(testnetURL, {
+            //mode: 'no-cors',
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `transactionBytes=${transactionBytesHEX}`,
+          });
+
+          response.text().then(data => {
+            console.log(data);
+          });
+        }
+
         //HEAT SDK can be exposed as some functions
         let pubKey = __heat__.HEAT_GET_PUBLICKEY_FROM_PRIVATEKEY({privateKeyAsHex: "12"})
 
@@ -9,19 +28,30 @@
         let config = new __heat__.Configuration({ isTestnet: true })
         let sdk = new __heat__.HeatSDK()
 
+        // let builder = new __heat__.Builder()
+        //     .isTestnet(config.isTestnet)
+        //     .genesisKey(config.genesisKey)
+        //     .attachment(new __heat__.attachment.ColoredCoinsWhitelistMarket().init("0", "9827585868724319515"))
+        //     .amountHQT("0")
+        //     .feeHQT("1000000000")
+
+        //ordinary payment
         let builder = new __heat__.Builder()
             .isTestnet(config.isTestnet)
             .genesisKey(config.genesisKey)
-            .attachment(new __heat__.attachment.ColoredCoinsWhitelistMarket().init("0", "9827585868724319515"))
-            .amountHQT("0")
+            .attachment(__heat__.attachment.ORDINARY_PAYMENT)
+            .amountHQT(__heat__.utils.convertToQNT("2"))
             .feeHQT("1000000000")
 
-        let txn = new __heat__.Transaction(sdk, "0", builder)
+        let recipient = "17778953465000958343"
+
+        let txn = new __heat__.Transaction(sdk, recipient, builder)
         txn.publicMessage("heat-sdk test")
             .sign("test secret phrase 1")
             .then(t => {
-                let transactionBytes = t.getTransaction().getBytesAsHex()
-                alert(transactionBytes)
+                let transactionBytesHEX = t.getTransaction().getBytesAsHex()
+                alert(transactionBytesHEX)
+                broadcast(transactionBytesHEX)
             })
     </script>
 </head>

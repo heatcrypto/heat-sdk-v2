@@ -440,6 +440,7 @@ var TransactionImpl = /** @class */ (function () {
             throw new Error("Transaction type not implemented or undefined");
         var builder = new Builder()
             .version(version)
+            .isTestnet(isTestnet)
             .senderPublicKey(senderPublicKey)
             .amountHQT(amountHQT.toUnsigned().toString())
             .feeHQT(feeHQT.toUnsigned().toString())
@@ -476,7 +477,16 @@ var TransactionImpl = /** @class */ (function () {
         if ((flags & position) != 0)
             builder.publicNameAssignment(new appendix_1.AppendixPublicNameAssignment().parse(buffer));
         if (isTestnet) {
-            builder.genesisKey([buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(),]);
+            builder.genesisKey([
+                buffer.readByte(),
+                buffer.readByte(),
+                buffer.readByte(),
+                buffer.readByte(),
+                buffer.readByte(),
+                buffer.readByte(),
+                buffer.readByte(),
+                buffer.readByte()
+            ]);
         }
         return new TransactionImpl(builder, null);
     };

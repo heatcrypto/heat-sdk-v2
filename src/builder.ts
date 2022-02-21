@@ -506,6 +506,7 @@ export class TransactionImpl {
     if (!transactionType) throw new Error("Transaction type not implemented or undefined")
     let builder = new Builder()
       .version(version)
+      .isTestnet(isTestnet!)
       .senderPublicKey(senderPublicKey)
       .amountHQT(amountHQT.toUnsigned().toString())
       .feeHQT(feeHQT.toUnsigned().toString())
@@ -541,7 +542,16 @@ export class TransactionImpl {
     if ((flags & position) != 0)
       builder.publicNameAssignment(new AppendixPublicNameAssignment().parse(buffer))
     if (isTestnet) {
-      builder.genesisKey([buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(), buffer.readByte(),]);
+      builder.genesisKey([
+        buffer.readByte(),
+        buffer.readByte(),
+        buffer.readByte(),
+        buffer.readByte(),
+        buffer.readByte(),
+        buffer.readByte(),
+        buffer.readByte(),
+        buffer.readByte()
+      ]);
     }
 
     return new TransactionImpl(builder, null)

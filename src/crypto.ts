@@ -37,8 +37,8 @@ import Big from 'big.js';
 import { gzip, inflate } from "pako"
 import Long from "long"
 import { randomBytes } from "./random-bytes"
-import { curve25519, curve25519_clamp, curve25519_ } from 'curve25519/dist/curve25519.js'
-import { CryptoJS } from 'cryptojs/dist/CryptoJS'
+import { curve25519, curve25519_clamp, curve25519_ } from 'curve25519'
+import { CryptoJS } from 'cryptojs'
 import { createHash, Hash } from 'crypto'
 
 let SHA256_hash: Hash;

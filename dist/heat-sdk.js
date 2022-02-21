@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HeatSDK = exports.Configuration = exports.Transaction = exports.TransactionImpl = exports.Builder = exports.attachment = void 0;
+exports.HeatSDK = exports.Configuration = exports.crypto = exports.converters = exports.Transaction = exports.TransactionImpl = exports.Builder = exports.attachment = void 0;
 /**
  * The MIT License (MIT)
  * Copyright (c) 2020 heatcrypto.
@@ -42,8 +42,8 @@ exports.HeatSDK = exports.Configuration = exports.Transaction = exports.Transact
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-var converters = __importStar(require("./converters"));
-var crypto = __importStar(require("./crypto"));
+var _converters = __importStar(require("./converters"));
+var _crypto = __importStar(require("./crypto"));
 var utils = __importStar(require("./utils"));
 var _attachment = __importStar(require("./attachment"));
 var builder = __importStar(require("./builder"));
@@ -54,6 +54,8 @@ exports.attachment = _attachment;
 exports.Builder = builder.Builder;
 exports.TransactionImpl = builder.TransactionImpl;
 exports.Transaction = transaction.Transaction;
+exports.converters = _converters;
+exports.crypto = _crypto;
 var Configuration = /** @class */ (function () {
     function Configuration(args) {
         this.isTestnet = false;
@@ -75,8 +77,8 @@ exports.Configuration = Configuration;
 var HeatSDK = /** @class */ (function () {
     function HeatSDK(config) {
         this.utils = utils;
-        this.crypto = crypto;
-        this.converters = converters;
+        this.crypto = exports.crypto;
+        this.converters = exports.converters;
         var config_ = config ? config : new Configuration();
         this.config = config_;
     }
@@ -87,11 +89,11 @@ var HeatSDK = /** @class */ (function () {
         return exports.TransactionImpl.parseJSON(json, this.config.isTestnet);
     };
     HeatSDK.prototype.passphraseEncrypt = function (plainText, passphrase) {
-        return crypto.passphraseEncrypt(plainText, passphrase).encode();
+        return exports.crypto.passphraseEncrypt(plainText, passphrase).encode();
     };
     HeatSDK.prototype.passphraseDecrypt = function (cipherText, passphrase) {
-        var encrypted = crypto.PassphraseEncryptedMessage.decode(cipherText);
-        return crypto.passphraseDecrypt(encrypted, passphrase);
+        var encrypted = exports.crypto.PassphraseEncryptedMessage.decode(cipherText);
+        return exports.crypto.passphraseDecrypt(encrypted, passphrase);
     };
     HeatSDK.prototype.payment = function (recipientOrRecipientPublicKey, amount) {
         return new exports.Transaction(this, recipientOrRecipientPublicKey, new exports.Builder()

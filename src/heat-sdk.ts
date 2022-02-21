@@ -20,8 +20,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-import * as converters from "./converters"
-import * as crypto from "./crypto"
+import * as _converters from "./converters"
+import * as _crypto from "./crypto"
 import * as utils from "./utils"
 import * as _attachment from "./attachment"
 import * as builder from "./builder"
@@ -42,6 +42,8 @@ export const attachment = _attachment
 export const Builder = builder.Builder
 export const TransactionImpl = builder.TransactionImpl
 export const Transaction = transaction.Transaction
+export const converters = _converters
+export const crypto = _crypto
 
 export interface ConfigArgs {
   isTestnet?: boolean

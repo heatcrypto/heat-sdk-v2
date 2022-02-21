@@ -29,6 +29,7 @@
     "node": ">=10.0.0"
   },
   "scripts": {
+    "postinstall": "npm dedupe",
     "test": "jest --detectOpenHandles",
     "build": "npm run test && rimraf dist && tsc --project tsconfig.json"
   },

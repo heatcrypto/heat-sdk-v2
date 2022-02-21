@@ -1,6 +1,6 @@
 {
   "name": "heat-sdk-v2",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "HEAT support libraries for Node.js",
   "keywords": [
     "heat",
@@ -29,7 +29,6 @@
     "node": ">=10.0.0"
   },
   "scripts": {
-    "postinstall": "npm dedupe",
     "test": "jest --detectOpenHandles",
     "build": "npm run test && rimraf dist && tsc --project tsconfig.json"
   },

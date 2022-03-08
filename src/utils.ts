@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-const Big = require('big.js');
+const Big = require('big.js').Big;
 import { hexStringToByteArray } from "./converters"
 import ByteBuffer from "bytebuffer"
 
@@ -166,8 +166,8 @@ export function convertToQNTf(quantity: string): string {
 }
 
 export function calculateTotalOrderPriceQNT(quantityQNT: string, priceQNT: string): string {
-  return Big(quantityQNT)
-    .times(Big(priceQNT).div(Big(100000000)))
+  return new Big(quantityQNT)
+    .times(new Big(priceQNT).div(Big(100000000)))
     .round()
     .toString()
 }

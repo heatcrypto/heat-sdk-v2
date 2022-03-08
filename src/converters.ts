@@ -127,11 +127,11 @@ export function byteArrayToBigInteger(
   bytes: Array<number>,
   opt_startIndex?: number
 ) {
-  var value = Big("0")
+  var value = new Big("0")
   var temp1, temp2
   for (var i = 7; i >= 0; i--) {
-    temp1 = value.times(Big("256"))
-    temp2 = temp1.plus(Big(bytes[opt_startIndex || 0 + i].toString(10)))
+    temp1 = value.times(new Big("256"))
+    temp2 = temp1.plus(new Big(bytes[opt_startIndex || 0 + i].toString(10)))
     value = temp2
   }
   return value

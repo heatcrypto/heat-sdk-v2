@@ -110,11 +110,11 @@ function byteArrayToSignedInt32(bytes, opt_startIndex) {
 }
 exports.byteArrayToSignedInt32 = byteArrayToSignedInt32;
 function byteArrayToBigInteger(bytes, opt_startIndex) {
-    var value = big_js_1.default("0");
+    var value = new big_js_1.default("0");
     var temp1, temp2;
     for (var i = 7; i >= 0; i--) {
-        temp1 = value.times(big_js_1.default("256"));
-        temp2 = temp1.plus(big_js_1.default(bytes[opt_startIndex || 0 + i].toString(10)));
+        temp1 = value.times(new big_js_1.default("256"));
+        temp2 = temp1.plus(new big_js_1.default(bytes[opt_startIndex || 0 + i].toString(10)));
         value = temp2;
     }
     return value;

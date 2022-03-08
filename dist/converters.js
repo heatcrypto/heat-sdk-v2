@@ -21,12 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.int32ToBytes = exports.shortArrayToHexString = exports.shortArrayToByteArray = exports.byteArrayToShortArray = exports.byteArrayToString = exports.wordArrayToByteArray = exports.byteArrayToWordArray = exports.byteArrayToBigInteger = exports.byteArrayToSignedInt32 = exports.byteArrayToSignedShort = exports.hexStringToString = exports.stringToHexString = exports.hexStringToByteArray = exports.stringToByteArray = exports.byteArrayToHexString = void 0;
-var big_js_1 = __importDefault(require("big.js"));
+var Big = require('big.js');
 var charToNibble = {};
 var nibbleToChar = [];
 var i;
@@ -110,11 +107,11 @@ function byteArrayToSignedInt32(bytes, opt_startIndex) {
 }
 exports.byteArrayToSignedInt32 = byteArrayToSignedInt32;
 function byteArrayToBigInteger(bytes, opt_startIndex) {
-    var value = new big_js_1.default("0");
+    var value = new Big("0");
     var temp1, temp2;
     for (var i = 7; i >= 0; i--) {
-        temp1 = value.times(new big_js_1.default("256"));
-        temp2 = temp1.plus(new big_js_1.default(bytes[opt_startIndex || 0 + i].toString(10)));
+        temp1 = value.times(new Big("256"));
+        temp2 = temp1.plus(new Big(bytes[opt_startIndex || 0 + i].toString(10)));
         value = temp2;
     }
     return value;

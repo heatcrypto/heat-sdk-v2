@@ -86,11 +86,11 @@ exports.calculateStringHash = calculateStringHash;
  * @returns Big
  */
 function byteArrayToBigInteger(byteArray, startIndex) {
-    var value = new Big("0");
+    var value = Big("0");
     var temp1, temp2;
     for (var i = byteArray.length - 1; i >= 0; i--) {
-        temp1 = value.times(new Big("256"));
-        temp2 = temp1.plus(new Big(byteArray[i].toString(10)));
+        temp1 = value.times(Big("256"));
+        temp2 = temp1.plus(Big(byteArray[i].toString(10)));
         value = temp2;
     }
     return value;

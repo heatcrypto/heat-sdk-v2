@@ -107,11 +107,11 @@ function byteArrayToSignedInt32(bytes, opt_startIndex) {
 }
 exports.byteArrayToSignedInt32 = byteArrayToSignedInt32;
 function byteArrayToBigInteger(bytes, opt_startIndex) {
-    var value = new Big("0");
+    var value = Big("0");
     var temp1, temp2;
     for (var i = 7; i >= 0; i--) {
-        temp1 = value.times(new Big("256"));
-        temp2 = temp1.plus(new Big(bytes[opt_startIndex || 0 + i].toString(10)));
+        temp1 = value.times(Big("256"));
+        temp2 = temp1.plus(Big(bytes[opt_startIndex || 0 + i].toString(10)));
         value = temp2;
     }
     return value;

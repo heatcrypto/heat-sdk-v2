@@ -170,8 +170,8 @@ function convertToQNTf(quantity) {
 }
 exports.convertToQNTf = convertToQNTf;
 function calculateTotalOrderPriceQNT(quantityQNT, priceQNT) {
-    return new Big(quantityQNT)
-        .times(new Big(priceQNT).div(Big(100000000)))
+    return Big(quantityQNT)
+        .times(Big(priceQNT).div(Big(100000000)))
         .round()
         .toString();
 }

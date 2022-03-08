@@ -21,8 +21,7 @@
  * SOFTWARE.
  * */
 
-const Big = require('big.js').Big;
-
+import { Big } from 'big.js'
 var charToNibble: { [key: string]: number } = {}
 var nibbleToChar: string[] = []
 var i

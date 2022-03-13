@@ -23,7 +23,7 @@
  * */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.int32ToBytes = exports.shortArrayToHexString = exports.shortArrayToByteArray = exports.byteArrayToShortArray = exports.byteArrayToString = exports.wordArrayToByteArray = exports.byteArrayToWordArray = exports.byteArrayToBigInteger = exports.byteArrayToSignedInt32 = exports.byteArrayToSignedShort = exports.hexStringToString = exports.stringToHexString = exports.hexStringToByteArray = exports.stringToByteArray = exports.byteArrayToHexString = void 0;
-var Big = require('big.js');
+var Big = require('big.js').Big;
 var charToNibble = {};
 var nibbleToChar = [];
 var i;

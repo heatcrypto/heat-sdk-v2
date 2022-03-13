@@ -21,7 +21,7 @@
  * SOFTWARE.
  * */
 
-const Big = require('big.js')
+ const { Big } = require('big.js')
 import {
   byteArrayToHexString,
   byteArrayToShortArray,

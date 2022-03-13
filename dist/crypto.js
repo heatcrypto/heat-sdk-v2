@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.passphraseDecrypt = exports.passphraseEncrypt = exports.PassphraseEncryptedMessage = exports.decryptMessage = exports.encryptMessage = exports.encryptBinaryNote = exports.encryptNote = exports.verifyBytes = exports.signBytes = exports.getAccountIdFromPublicKey = exports.getAccountId = exports.getPublicKeyFromPrivateKey = exports.getPrivateKey = exports.secretPhraseToPublicKey = exports.calculateTransactionId = exports.fullNameToLong = exports.fullNameToHash = exports.calculateFullHash = exports.byteArrayToBigInteger = exports.calculateStringHash = exports.random32Values = exports.random16Values = exports.random8Values = exports.SHA256 = void 0;
-var Big = require('big.js');
+var Big = require('big.js').Big;
 var converters_1 = require("./converters");
 var pako_1 = require("pako");
 var long_1 = __importDefault(require("long"));

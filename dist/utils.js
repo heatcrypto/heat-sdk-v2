@@ -23,7 +23,7 @@ exports.writeBytes = exports.readBytes = exports.isEmpty = exports.extend = expo
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * */
-var Big = require('big.js');
+var Big = require('big.js').Big;
 var converters_1 = require("./converters");
 function isPublicKey(publicKeyHex) {
     // if (parseInt(publicKeyHex, 16).toString(16) === publicKeyHex.toLowerCase()) {

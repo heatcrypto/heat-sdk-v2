@@ -104,11 +104,12 @@ export class Transaction {
             secretPhrase
           )
             .then(encryptedMessage => {
-              let a = (isPrivate
-                ? new AppendixEncryptedMessage()
-                : new AppendixEncryptToSelfMessage()
-              ).init(encryptedMessage, !this.messageIsBinary_)
-              this.builder.encryptToSelfMessage(a)
+              if (isPrivate) {
+                this.builder.encryptMessage(new AppendixEncryptedMessage().init(encryptedMessage, !this.messageIsBinary_))
+              }
+              if (isPrivateToSelf) {
+                this.builder.encryptToSelfMessage(new AppendixEncryptToSelfMessage().init(encryptedMessage, !this.messageIsBinary_))
+              }
               resolve() // resolve in encryptMessage callback
             })
             .catch(reject)

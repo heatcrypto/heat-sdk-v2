@@ -35,8 +35,9 @@ import {
   ColoredCoinsBidOrderCancellation,
   AtomicMultiTransfer
 } from "./attachment"
-import { Fee } from "./fee"
-import { AtomicTransfer } from "./attachment"
+import {Fee} from "./fee"
+import {AtomicTransfer} from "./attachment"
+import {createAssetProperties, IHeatBundleAssetProperties} from "./bundle";
 
 export const attachment = _attachment
 export const Builder = builder.Builder
@@ -52,7 +53,8 @@ export interface ConfigArgs {
 
 export class Configuration {
   isTestnet = false
-  genesisKey: number[]|undefined
+  genesisKey: number[] | undefined
+
   constructor(args?: ConfigArgs) {
     if (args) {
       if (utils.isDefined(args.isTestnet)) this.isTestnet = !!args.isTestnet
@@ -82,8 +84,8 @@ export class HeatSDK {
    */
   public builder() {
     return new Builder()
-        .isTestnet(this.config.isTestnet)
-        .genesisKey(this.config.genesisKey)
+      .isTestnet(this.config.isTestnet)
+      .genesisKey(this.config.genesisKey)
   }
 
   public parseTransactionBytes(transactionBytesHex: string) {
@@ -149,15 +151,18 @@ export class HeatSDK {
     quantity: string,
     decimals: number,
     dillutable: boolean,
+    assetProperties?: IHeatBundleAssetProperties,
     feeHQT?: string
   ) {
-    let builder = this.builder()
+    const builder = this.builder()
       .attachment(
         new AssetIssuance().init(descriptionUrl, descriptionHash, quantity, decimals, dillutable)
       )
       .amountHQT("0")
       .feeHQT(feeHQT ? feeHQT : Fee.ASSET_ISSUANCE_FEE)
-    return new Transaction(this, "0", builder)
+    const txn = new Transaction(this, "0", builder)
+    if (assetProperties) txn.publicMessage(createAssetProperties(assetProperties), true)
+    return txn
   }
 
   public assetTransfer(

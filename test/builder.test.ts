@@ -49,7 +49,7 @@ import {
 import { byteArrayToHexString, hexStringToByteArray, stringToHexString } from "../src/converters"
 import { Configuration, HeatSDK } from "../src/heat-sdk"
 import { HeatApi } from "./heat-api"
-import { signBytes } from "../src/crypto"
+import {secretPhraseToPublicKey, signBytes} from "../src/crypto"
 
 const heatsdk = new HeatSDK(
   new Configuration({
@@ -656,6 +656,21 @@ describe("Transaction builder", () => {
     return heatsdk
       .payment("12345", "100.2")
       .publicMessage("Hello world")
+      .sign("secret phrase")
+      .then(t => {
+        let transaction = t.getTransaction()
+        let bytes = transaction!.getBytesAsHex()
+        let parsedTxn = TransactionImpl.parse(bytes)
+        expect(parsedTxn).toBeInstanceOf(TransactionImpl)
+        return expect(parsedTxn.getJSONObject()).toEqual(transaction!.getJSONObject())
+      })
+  })
+
+  it("can parse transaction bytes 2", () => {
+    const pubKeyHex = secretPhraseToPublicKey("abc")
+    return heatsdk
+      .payment(pubKeyHex, "100.2")
+      .privateMessage("Hello world")
       .sign("secret phrase")
       .then(t => {
         let transaction = t.getTransaction()

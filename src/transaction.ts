@@ -27,6 +27,17 @@ import { hexStringToByteArray, stringToByteArray } from "./converters"
 import { secretPhraseToPublicKey, getAccountIdFromPublicKey, encryptMessage } from "./crypto"
 import { HeatSDK } from "./heat-sdk"
 
+export interface IBroadcastOutput {
+  /**
+   * The full hash of the signed transaction ,
+   */
+  fullHash: string
+  /**
+   * The transaction ID
+   */
+  transaction: string
+}
+
 export class Transaction {
   private publicMessage_: string | undefined
   private privateMessage_: string | undefined

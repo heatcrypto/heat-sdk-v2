@@ -32,12 +32,14 @@ import * as crypto from "../src/crypto"
 import { AtomicTransfer } from "../src/attachment"
 import { TransactionImpl } from "../src/builder"
 import {AssetPropertiesProtocol1, IHeatBundleAssetProperties} from "../src/bundle";
+import {HeatApi} from "./heat-api";
+import {IBroadcastOutput} from "../src/transaction";
+import {secretPhraseToPublicKey} from "../src/crypto";
 
-/*
 function handleBroadcastResult(promise: Promise<any>, done: () => {}) {
   promise
     .then((data: IBroadcastOutput) => {
-      //console.log(data)
+      // console.log(data)
       expect(data.fullHash).toBeDefined()
       done()
     })
@@ -47,7 +49,7 @@ function handleBroadcastResult(promise: Promise<any>, done: () => {}) {
       done()
     })
 }
-*/
+
 
 /* the tests passes until the account balance has the money */
 
@@ -59,25 +61,50 @@ describe("Transaction API", () => {
   })
   const heatsdk = new HeatSDK(config)
 
-  /*it("broadcast payment", done => {
-    /!* the test passes until the account balance has the money *!/
+  const heatapi = new HeatApi({
+    baseURL: 'https://alpha.heatledger.com:7734/api/v1'
+  })
+
+
+  it("broadcast payment with public message", done => {
+    /* the test passes until the account balance has the money */
     let promise = heatsdk
       .payment("4644748344150906433", "0.001")
       .publicMessage("heat-sdk test")
-      .deadline(1440 * 150)
+      .deadline(1440)
       .sign(ACCOUNT_1.SECRET_PHRASE)
-      .then(transaction => transaction.broadcast())
-    handleResult(promise, done)
+      .then(transaction => {
+        return heatapi.broadcast(transaction)
+      })
+    handleBroadcastResult(promise, done)
+  })
+
+  it("broadcast payment with private message", done => {
+    const pubKeyHex = secretPhraseToPublicKey("user2")
+    const promise = heatsdk
+      .payment(pubKeyHex, "3")
+      .publicMessage("Hello world")
+      .sign("user3")
+      .then(t => {
+        let transaction = t.getTransaction()
+        let bytes = transaction!.getBytesAsHex()
+        let parsedTxn = TransactionImpl.parse(bytes)
+        expect(parsedTxn).toBeInstanceOf(TransactionImpl)
+        expect(parsedTxn.getJSONObject()).toEqual(transaction!.getJSONObject())
+        return heatapi.broadcast(t)
+      })
+    handleBroadcastResult(promise, done)
   })
 
   it("broadcast arbitrary message", done => {
     const promise = heatsdk
       .arbitraryMessage("4644748344150906433", "Qwerty Йцукен")
       .sign(ACCOUNT_1.SECRET_PHRASE)
-      .then(transaction => transaction.broadcast())
-    handleResult(promise, done)
+      .then(t => heatapi.broadcast(t))
+    handleBroadcastResult(promise, done)
   })
 
+  /*
   it("broadcast private message", done => {
     const promise = heatsdk
       .privateMessage(crypto.secretPhraseToPublicKey("user1"), "Private Info")
@@ -85,15 +112,17 @@ describe("Transaction API", () => {
       .then(transaction => transaction.broadcast())
     handleResult(promise, done)
   })
+*/
 
   it("broadcast private message to self", done => {
     const promise = heatsdk
       .privateMessageToSelf("Private message to self")
       .sign(ACCOUNT_1.SECRET_PHRASE)
-      .then(transaction => transaction.broadcast())
-    handleResult(promise, done)
+      .then(t => heatapi.broadcast(t))
+    handleBroadcastResult(promise, done)
   })
 
+  /*
   it("Asset Issuance", done => {
     // issue standard asset
     let promise = heatsdk
@@ -110,7 +139,7 @@ describe("Transaction API", () => {
       .then(transaction => transaction.broadcast())
     handleResult(promise, done)
   })*/
-
+/*
   it("Asset Issuance with properties", done => {
     // create a asset properties bundle, pass asset=0 to have the bundle replicator
     // take the asset id from the current transaction (since the asset does not exist yet)
@@ -122,25 +151,26 @@ describe("Transaction API", () => {
       .sign(ACCOUNT_1.SECRET_PHRASE)
       .then(transaction => console.log(JSON.stringify(transaction)))
   })
+*/
 
 
-/*
   it("Asset Transfer", done => {
     let promise = heatsdk
       .assetTransfer(ASSET_2.ISSUER.ID, ASSET_1.ID, "4")
       .publicMessage("heat-sdk test")
       .sign(ASSET_1.ISSUER.SECRET_PHRASE)
-      .then(transaction => transaction.broadcast())
-    handleResult(promise, done)
-    //transfer back
+      .then(t => heatapi.broadcast(t))
+    handleBroadcastResult(promise, done)
+    // transfer back
     promise = heatsdk
       .assetTransfer(ASSET_1.ISSUER.ID, ASSET_1.ID, "4")
       .publicMessage("heat-sdk test")
       .sign(ASSET_2.ISSUER.SECRET_PHRASE)
-      .then(transaction => transaction.broadcast())
-    handleResult(promise, done)
+      .then(t => heatapi.broadcast(t))
+    handleBroadcastResult(promise, done)
   })
 
+  /*
   it("Atomic Multi Asset Transfer", done => {
     // let promise = heatsdk
     //   .atomicMultiTransfer(ASSET_2.ISSUER.ID, ASSET_1.ID, "4")

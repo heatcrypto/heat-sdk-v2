@@ -21,6 +21,7 @@
  * SOFTWARE.
  * */
 import fetch from "node-fetch"
+import {Transaction} from "../src/transaction";
 
 export interface HeatApiConfig {
   baseURL: string
@@ -82,7 +83,13 @@ export class HeatApi {
     })
   }
 
-  /* Encodes an one level deep object as URLSearchParams for use in 
+  public broadcast<T>(t: Transaction): Promise<T> {
+    return this.post("/tx/broadcast", {
+      transactionBytes: t.getTransaction()?.getBytesAsHex()
+    })
+  }
+
+  /* Encodes an one level deep object as URLSearchParams for use in
      application/x-www-form-urlencoded POST body. */
   private searchParams(params: { [key: string]: string }): string {
     let result: string[] = []

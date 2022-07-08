@@ -57,16 +57,18 @@ var Transaction = /** @class */ (function () {
             }
             else {
                 var isPrivate_1 = utils_1.isDefined(_this.privateMessage_);
-                var isPrivateToSelf = utils_1.isDefined(_this.privateMessageToSelf_);
-                if (isPrivate_1 || isPrivateToSelf) {
+                var isPrivateToSelf_1 = utils_1.isDefined(_this.privateMessageToSelf_);
+                if (isPrivate_1 || isPrivateToSelf_1) {
                     if (!recipientPublicKeyHex)
                         throw new Error("Recipient public key not provided");
                     crypto_1.encryptMessage(isPrivate_1 ? _this.privateMessage_ : _this.privateMessageToSelf_, recipientPublicKeyHex, secretPhrase)
                         .then(function (encryptedMessage) {
-                        var a = (isPrivate_1
-                            ? new appendix_1.AppendixEncryptedMessage()
-                            : new appendix_1.AppendixEncryptToSelfMessage()).init(encryptedMessage, !_this.messageIsBinary_);
-                        _this.builder.encryptToSelfMessage(a);
+                        if (isPrivate_1) {
+                            _this.builder.encryptMessage(new appendix_1.AppendixEncryptedMessage().init(encryptedMessage, !_this.messageIsBinary_));
+                        }
+                        if (isPrivateToSelf_1) {
+                            _this.builder.encryptToSelfMessage(new appendix_1.AppendixEncryptToSelfMessage().init(encryptedMessage, !_this.messageIsBinary_));
+                        }
                         resolve(); // resolve in encryptMessage callback
                     })
                         .catch(reject);

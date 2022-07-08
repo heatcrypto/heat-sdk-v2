@@ -75,7 +75,7 @@ var Builder = /** @class */ (function () {
         this._message = message;
         return this;
     };
-    Builder.prototype.encryptedMessage = function (encryptedMessage) {
+    Builder.prototype.encryptMessage = function (encryptedMessage) {
         this._encryptedMessage = encryptedMessage;
         return this;
     };
@@ -399,7 +399,7 @@ var TransactionImpl = /** @class */ (function () {
         if (utils_1.isDefined(attachment["version.Message"]))
             builder.message(new appendix_1.AppendixMessage().parseJSON(attachment));
         if (utils_1.isDefined(attachment["version.EncryptedMessage"]))
-            builder.encryptedMessage(new appendix_1.AppendixEncryptedMessage().parseJSON(attachment));
+            builder.encryptMessage(new appendix_1.AppendixEncryptedMessage().parseJSON(attachment));
         if (utils_1.isDefined(attachment["version.PublicKeyAnnouncement"]))
             builder.publicKeyAnnouncement(new appendix_1.AppendixPublicKeyAnnouncement().parseJSON(attachment));
         if (utils_1.isDefined(attachment["version.EncryptToSelfMessage"]))
@@ -456,7 +456,7 @@ var TransactionImpl = /** @class */ (function () {
             builder.message(new appendix_1.AppendixMessage().parse(buffer));
         position <<= 1;
         if ((flags & position) != 0)
-            builder.encryptedMessage(new appendix_1.AppendixEncryptedMessage().parse(buffer));
+            builder.encryptMessage(new appendix_1.AppendixEncryptedMessage().parse(buffer));
         position <<= 1;
         if ((flags & position) != 0)
             builder.publicKeyAnnouncement(new appendix_1.AppendixPublicKeyAnnouncement().parse(buffer));

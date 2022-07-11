@@ -53,6 +53,7 @@ var EmptyAttachment = /** @class */ (function (_super) {
         return _this;
     }
     EmptyAttachment.prototype.parse = function (buffer) {
+        buffer.offset++; // advance the buffer position past the version byte
         return this;
     };
     EmptyAttachment.prototype.getSize = function () {

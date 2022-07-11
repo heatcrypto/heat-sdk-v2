@@ -100,8 +100,7 @@ export class OrdinaryPayment extends TransactionType {
     return TransactionType.SUBTYPE_PAYMENT_ORDINARY_PAYMENT
   }
   parseAttachment(buffer: ByteBuffer) {
-    buffer.offset++ // advance the buffer position past the version byte
-    return attachment.ORDINARY_PAYMENT
+    return attachment.ORDINARY_PAYMENT.parse(buffer)
   }
   parseAttachmentJSON(json: { [key: string]: any }) {
     return attachment.ORDINARY_PAYMENT
@@ -119,8 +118,7 @@ export class ArbitraryMessage extends TransactionType {
     return TransactionType.SUBTYPE_MESSAGING_ARBITRARY_MESSAGE
   }
   parseAttachment(buffer: ByteBuffer) {
-    buffer.offset++ // advance the buffer position past the version byte
-    return attachment.ARBITRARY_MESSAGE
+    return attachment.ARBITRARY_MESSAGE.parse(buffer)
   }
   parseAttachmentJSON(json: { [key: string]: any }) {
     return attachment.ARBITRARY_MESSAGE

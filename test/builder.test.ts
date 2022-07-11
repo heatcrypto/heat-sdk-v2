@@ -709,7 +709,7 @@ describe("Transaction builder", () => {
     })
   })
 
-  xit("can parse 'Asset Transfer' transaction bytes on the server", done => {
+  it("can parse 'Asset Transfer' transaction bytes on the server", done => {
     let builder = new Builder()
       .attachment(new AssetTransfer().init(ASSET_1.ID, "100"))
       .amountHQT("0")

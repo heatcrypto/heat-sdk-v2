@@ -39,6 +39,7 @@ export abstract class EmptyAttachment extends AbstractAppendix implements Attach
   }
 
   public parse(buffer: ByteBuffer) {
+    buffer.offset++ // advance the buffer position past the version byte
     return this
   }
 

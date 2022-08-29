@@ -184,9 +184,8 @@ export function getPrivateKey(secretPhrase: string) {
  * @param privateKeyHex 
  */
 export function getPublicKeyFromPrivateKey(privateKeyHex: string) {
-  var secretPhraseBytes = hexStringToByteArray(privateKeyHex)
-  var digest = simpleHash(secretPhraseBytes)
-  return byteArrayToHexString(curve25519.keygen(digest).p)
+  var privateKeyBytes = hexStringToByteArray(privateKeyHex)
+  return byteArrayToHexString(curve25519.keygen(privateKeyBytes).p)
 }
 
 /**

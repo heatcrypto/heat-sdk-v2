@@ -332,11 +332,11 @@ describe("random8Values, random16Values, random32Values test", () => {
 
 describe('From private key to public key to address', () => {
   it('works', () => {
-    const privatekey = '9d3738fe074fcdfed1d3a1891340172ca670c3860af2666570fff0cb88497aed'
+    const secretPhrase = '9d3738fe074fcdfed1d3a1891340172ca670c3860af2666570fff0cb88497aed'
     const expectedPublickey = 'b7d8a0212130ec519dea029d7a6fbbc180205a9cdb1c3743e6659d3258bd7a0f'
     const expectedAddress = '8448398312458207917'
   
-    const publicKey = secretPhraseToPublicKey(privatekey)
+    const publicKey = secretPhraseToPublicKey(secretPhrase)
     const address = getAccountIdFromPublicKey(publicKey)
   
     expect(publicKey).toEqual(expectedPublickey)

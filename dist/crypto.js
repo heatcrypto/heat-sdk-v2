@@ -168,9 +168,8 @@ exports.getPrivateKey = getPrivateKey;
  * @param privateKeyHex
  */
 function getPublicKeyFromPrivateKey(privateKeyHex) {
-    var secretPhraseBytes = converters_1.hexStringToByteArray(privateKeyHex);
-    var digest = simpleHash(secretPhraseBytes);
-    return converters_1.byteArrayToHexString(curve25519_js_1.curve25519.keygen(digest).p);
+    var privateKeyBytes = converters_1.hexStringToByteArray(privateKeyHex);
+    return converters_1.byteArrayToHexString(curve25519_js_1.curve25519.keygen(privateKeyBytes).p);
 }
 exports.getPublicKeyFromPrivateKey = getPublicKeyFromPrivateKey;
 /**

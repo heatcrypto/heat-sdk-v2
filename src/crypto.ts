@@ -184,7 +184,7 @@ export function getPrivateKey(secretPhrase: string) {
  * @param privateKeyHex 
  */
 export function getPublicKeyFromPrivateKey(privateKeyHex: string) {
-  var privateKeyBytes = hexStringToByteArray(privateKeyHex)
+  const privateKeyBytes = hexStringToByteArray(privateKeyHex)
   return byteArrayToHexString(curve25519.keygen(privateKeyBytes).p)
 }
 
@@ -193,7 +193,7 @@ export function getPublicKeyFromPrivateKey(privateKeyHex: string) {
  * @returns String
  */
 export function getAccountId(secretPhrase: string) {
-  var publicKey = secretPhraseToPublicKey(secretPhrase)
+  const publicKey = secretPhraseToPublicKey(secretPhrase)
   return getAccountIdFromPublicKey(publicKey)
 }
 

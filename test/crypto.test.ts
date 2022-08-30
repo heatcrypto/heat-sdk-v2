@@ -35,7 +35,7 @@ let bob = {
 
 let alice = {
   secretPhrase: "user3",
-  publicKeyStr: "4376219788e7d1946ad377196fd7103958d3d6d6618dc93d2d0d6b4f717b641d", //???
+  publicKeyStr: "4376219788e7d1946ad377196fd7103958d3d6d6618dc93d2d0d6b4f717b641d",
   privateKeyStr: "5860faf02b6bc6222ba5aca523560f0e364ccd8b67bee486fe8bf7c01d492c4b",
   account: "1522541402758811473"
 }
@@ -98,56 +98,33 @@ describe("calculateTransactionId test", () => {
   })
 })
 
-describe("secretPhraseToPublicKey test", () => {
-  it("is a function", () => {
-    expect(secretPhraseToPublicKey).toBeInstanceOf(Function)
-  })
-  it("returns public key of secret phrase", () => {
+describe("Keys conversion test", () => {
+  it("return public key of secret phrase", () => {
     expect(secretPhraseToPublicKey(bob.secretPhrase)).toBe(bob.publicKeyStr)
     expect(secretPhraseToPublicKey(alice.secretPhrase)).toBe(alice.publicKeyStr)
   })
-})
-
-describe("getPrivateKey test", () => {
-  it("is a function", () => {
-    expect(getPrivateKey).toBeInstanceOf(Function)
-  })
-  it("returns private key", () => {
+  it("return private key from secret phrase", () => {
     expect(getPrivateKey(bob.secretPhrase)).toBe(bob.privateKeyStr)
     expect(getPrivateKey(alice.secretPhrase)).toBe(alice.privateKeyStr)
   })
-})
-
-describe("getPublicKeyFromPrivateKey test", () => {
-  it("is a function", () => {
-    expect(getPublicKeyFromPrivateKey).toBeInstanceOf(Function)
+  it("return public key from private key", () => {
+    expect(getPublicKeyFromPrivateKey(bob.privateKeyStr)).toBe(bob.publicKeyStr)
+    expect(getPublicKeyFromPrivateKey(alice.privateKeyStr)).toBe(alice.publicKeyStr)
   })
-  it("returns public key", () => {
-    const privateKey = 'c7e7327f3f4dee9837a8e909945012a362022371edfbd5de5839579914de0b69'
-    const publicKey = '29d6b689261fceae9a5e56e01c9a447e28c7fb572dde6dc8ba6f00ebca871b40'
-    const accountId = '14917505173645061641'
-    expect(getPublicKeyFromPrivateKey(privateKey)).toEqual(publicKey)
-    expect(getAccountIdFromPublicKey(publicKey)).toEqual(accountId)
-  })
-})
-
-describe("getAccountId test", () => {
-  it("is a function", () => {
-    expect(getAccountId).toBeInstanceOf(Function)
-  })
-  it("returns account id", () => {
+  it("return account id from secret phrase", () => {
     expect(getAccountId(bob.secretPhrase)).toBe(bob.account)
     expect(getAccountId(alice.secretPhrase)).toBe(alice.account)
   })
-})
-
-describe("getAccountIdFromPublicKey test", () => {
-  it("is a function", () => {
-    expect(getAccountIdFromPublicKey).toBeInstanceOf(Function)
-  })
-  it("returns account id", () => {
+  it("return account id from public key", () => {
     expect(getAccountIdFromPublicKey(bob.publicKeyStr)).toBe(bob.account)
     expect(getAccountIdFromPublicKey(alice.publicKeyStr)).toBe(alice.account)
+  })
+  it("Complex keys conversion", () => {
+    let bobPrivateKeyHex = getPrivateKey(bob.secretPhrase)
+    let bobPublicKeyHex = getPublicKeyFromPrivateKey(bobPrivateKeyHex)
+    let bobPublicKeyHex2 = secretPhraseToPublicKey(bob.secretPhrase)
+    expect(bobPublicKeyHex).toBe(bobPublicKeyHex2)
+    expect(getAccountIdFromPublicKey(bobPublicKeyHex)).toBe(getAccountId(bob.secretPhrase))
   })
 })
 
@@ -187,11 +164,11 @@ describe("encryptNote test", () => {
     expect(encryptNote).toBeInstanceOf(Function)
   })
   it("returns encrypted note", () => {
-    let text = "qwerty1 näkökenttäsi лыжи 政府信息公开发布平台"
-    let options: IEncryptOptions = {
-      account: bob.account,
-      privateKey: hexStringToByteArray(bob.privateKeyStr),
-      publicKey: hexStringToByteArray(bob.publicKeyStr)
+    const text = "qwerty1 näkökenttäsi лыжи 政府信息公开发布平台"
+    const options: IEncryptOptions = {
+      account: alice.account,
+      publicKey: hexStringToByteArray(alice.publicKeyStr),
+      privateKey: hexStringToByteArray(bob.privateKeyStr)
     }
     return encryptNote(text, options, bob.secretPhrase)
       .then(encrypted => {
@@ -199,11 +176,10 @@ describe("encryptNote test", () => {
           encrypted.message,
           encrypted.nonce,
           bob.publicKeyStr,
-          bob.secretPhrase
+          alice.secretPhrase
         )
         return expect(decrypted).toBe(text)
       })
-      .catch(console.error)
   })
 })
 

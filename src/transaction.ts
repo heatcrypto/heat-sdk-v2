@@ -72,8 +72,8 @@ export class Transaction {
         recipientPublicKeyHex = isPublicKey(this.recipientOrRecipientPublicKey!)
           ? this.recipientOrRecipientPublicKey
           : null
-
-      if (recipientPublicKeyHex) {
+      // prevents: 'PublicKeyAnnouncement cannot be attached to transactions with no recipient'
+      if (recipientPublicKeyHex && this.recipientOrRecipientPublicKey != '0') {
         this.builder
           .publicKeyAnnouncement(
             new AppendixPublicKeyAnnouncement().init(

@@ -41,7 +41,8 @@ var Transaction = /** @class */ (function () {
                 recipientPublicKeyHex = utils_1.isPublicKey(_this.recipientOrRecipientPublicKey)
                     ? _this.recipientOrRecipientPublicKey
                     : null;
-            if (recipientPublicKeyHex) {
+            // prevents: 'PublicKeyAnnouncement cannot be attached to transactions with no recipient'
+            if (recipientPublicKeyHex && _this.recipientOrRecipientPublicKey != '0') {
                 _this.builder
                     .publicKeyAnnouncement(new appendix_1.AppendixPublicKeyAnnouncement().init(converters_1.hexStringToByteArray(recipientPublicKeyHex)))
                     .recipientId(crypto_1.getAccountIdFromPublicKey(recipientPublicKeyHex));
